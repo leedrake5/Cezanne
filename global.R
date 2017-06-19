@@ -89,6 +89,9 @@ read_csv_all <- function(files){
 }
 
 
+transform_0_1 <- function(x){(x-min(x))/(max(x)-min(x))}
+
+
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 

@@ -1,4 +1,5 @@
 library(shiny)
+library(colourpicker)
 library(ggplot2)
 library(reshape2)
 library(pbapply)
@@ -115,7 +116,7 @@ outLines <- reactive({
 
 
 
-
+####Single Plot
 output$inElements <- renderUI({
     selectInput(inputId = "elements", label = h4("Choose Element Line"), choices =  outElements())
 })
@@ -125,10 +126,35 @@ output$inLines <- renderUI({
 })
 
 
+####Multi element Plot
+output$inElement1 <- renderUI({
+    selectInput(inputId = "element1", label = h4("Choose Element Line"), choices =  outElements(), selected="Fe")
+})
+
+output$inLine1 <- renderUI({
+    selectInput(inputId = "line1", label = h4("Choose Element Line"), choices =  outLines())
+})
+
+output$inElement2 <- renderUI({
+    selectInput(inputId = "element2", label = h4("Choose Element Line"), choices =  outElements(), selected="Co")
+})
+
+output$inLine2 <- renderUI({
+    selectInput(inputId = "line2", label = h4("Choose Element Line"), choices =  outLines())
+})
+
+output$inElement3 <- renderUI({
+    selectInput(inputId = "element3", label = h4("Choose Element Line"), choices =  outElements(), selected="Pb")
+})
+
+output$inLine3 <- renderUI({
+    selectInput(inputId = "line3", label = h4("Choose Element Line"), choices =  outLines(), selected="L1")
+})
 
 
 
-plotInput <- reactive({
+
+plotInputSingle <- reactive({
     
     colvals = as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
     
@@ -136,12 +162,6 @@ plotInput <- reactive({
     
     fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
     
-    spectral.map <- ggplot(fishSubset) +
-    geom_tile(aes(x, y, colour=Net, fill=Net)) +
-    scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-    scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-    coord_equal() +
-    theme_classic()
     
     
     
@@ -163,47 +183,170 @@ plotInput <- reactive({
     fish.int.melt$x <- fish.int$x[fish.int.melt$x]
     fish.int.melt$y <- fish.int$y[fish.int.melt$y]
     
+    fish.int.melt$z <- transform_0_1(fish.int.melt$z)
+    
+    
     fish.int.melt[is.na(fish.int.melt)] <- 0
+    
+    fish.int.melt <- subset(fish.int.melt, z > 0.1)
+
     
     
     spectral.int.map <- ggplot(fish.int.melt) +
-    geom_tile(aes(x, y, colour=z, fill=z)) +
-    scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+    geom_tile(aes(x, y,  fill=z, alpha=z)) +
+    #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
     scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+    scale_alpha_continuous("Net Counts", range=c(0, 1)) +
     coord_equal() +
+    guides(alpha=FALSE) +
     theme_classic()
     
     
-    
-    if (input$interpolate == FALSE) {
-        spectral.map
-    } else if (input$interpolate == TRUE) {
         spectral.int.map
-    }
-
-
-
-
-
-
+    
 })
 
 
 output$simpleMap <- renderPlot({
-    print(plotInput())
+    print(plotInputSingle())
 })
 
 
 output$downloadmap <- downloadHandler(
-filename = function() { paste(input$dataset, '.tiff', sep='') },
+filename = function() { paste(input$project, "_", input$elements, "_", input$lines, '.tiff', sep='') },
 content = function(file) {
-    ggsave(file,plotInput(), width=7, height=7, dpi=300, device="tiff")
+    ggsave(file,plotInputSingle(), width=7, height=7, dpi=300, device="tiff")
 }
-
-
 )
 
 
+dataSplit <- reactive({
+    
+    fishImport <- myData()
+    
+    fishSubset1 <- fishImport %>% filter(Line==input$line1 & Element==input$element1)
+    fishSubset2 <- fishImport %>% filter(Line==input$line2 & Element==input$element2)
+    fishSubset3 <- fishImport %>% filter(Line==input$line3 & Element==input$element3)
+    
+    ###Europe
+    xmin <- min(fishSubset1$x)
+    xmax <- max(fishSubset1$x)
+    ymin <- min(fishSubset1$y)
+    ymax <- max(fishSubset1$y)
+    
+    x.range <- xmax-xmin
+    y.range <- ymax-ymin
+    
+    y.ratio <- y.range/x.range
+    
+    
+    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.melt.1 <- melt(fish.int.1$z, na.rm=TRUE)
+    colnames(fish.int.melt.1) <- c("x", "y", "z")
+    
+    fish.int.melt.1$x <- fish.int.1$x[fish.int.melt.1$x]
+    fish.int.melt.1$y <- fish.int.1$y[fish.int.melt.1$y]
+    
+    fish.int.melt.1$z <- transform_0_1(fish.int.melt.1$z)
+    
+    
+    fish.int.melt.1[is.na(fish.int.melt.1)] <- 0
+    
+    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$z > 0.1)
+    
+    
+    #   fish.int.melt.1$z <- fish.int.melt.1$z[ fish.int.melt.1$z<0.1 ] <- 0
+    
+    
+    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.melt.2 <- melt(fish.int.2$z, na.rm=TRUE)
+    colnames(fish.int.melt.2) <- c("x", "y", "z")
+    
+    fish.int.melt.2$x <- fish.int.2$x[fish.int.melt.2$x]
+    fish.int.melt.2$y <- fish.int.2$y[fish.int.melt.2$y]
+    
+    fish.int.melt.2$z <- transform_0_1(fish.int.melt.2$z)
+    
+    
+    fish.int.melt.2[is.na(fish.int.melt.2)] <- 0
+    
+    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$z > 0.1)
+    
+    #fish.int.melt.2$z <- fish.int.melt.2$z[ fish.int.melt.2$z<0.1 ] <- 0
+    
+    
+    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.melt.3 <- melt(fish.int.3$z, na.rm=TRUE)
+    colnames(fish.int.melt.3) <- c("x", "y", "z")
+    
+    fish.int.melt.3$x <- fish.int.3$x[fish.int.melt.3$x]
+    fish.int.melt.3$y <- fish.int.3$y[fish.int.melt.3$y]
+    
+    fish.int.melt.3$z <- transform_0_1(fish.int.melt.3$z)
+    
+    
+    fish.int.melt.3[is.na(fish.int.melt.3)] <- 0
+    
+    fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$z > 0.1)
+    
+    #fish.int.melt.3$z <- fish.int.melt.3$z[ fish.int.melt.3$z<0.1 ] <- 0
+    
+    #fish.merge <- data.frame(fish.int.melt.1$x, fish.int.melt.1$y, fish.int.melt.1$z, fish.int.melt.2$z, fish.int.melt.3$z)
+    #colnames(fish.merge) <- c("x", "y", "z1", "z2", "z3")
+    
+    fish.x <- c(fish.int.melt.1$x, fish.int.melt.2$x, fish.int.melt.3$x)
+    fish.y <- c(fish.int.melt.1$y, fish.int.melt.2$y, fish.int.melt.3$y)
+    fish.z <- c(fish.int.melt.1$z, fish.int.melt.2$z, fish.int.melt.3$z)
+    fish.element <- c(rep(paste("1. ", input$element1, sep="", collapse=""), length(fish.int.melt.1$z)), rep(paste("2. ", input$element2, sep="", collapse=""), length(fish.int.melt.2$z)), rep(paste("3. ", input$element3, sep="", collapse=""), length(fish.int.melt.3$z)))
+    
+    fish.merge <- data.frame(fish.x, fish.y, fish.z, fish.element)
+    colnames(fish.merge) <- c("x", "y", "z", "Element")
+    fish.merge
+
+    
+})
+
+
+
+
+plotInputMultiple <- reactive({
+    
+    fish.merge <- dataSplit()
+    
+    colvals = as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
+    
+
+    spectral.int.map <- ggplot(fish.merge, aes(x, y)) +
+    geom_tile(aes(fill=Element, alpha=z)) +
+    #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+    scale_alpha_continuous("Net Counts", range=c(0.1, 1)) +
+    scale_fill_manual("Net Counts",
+    breaks=c(paste("1. ", input$element1, sep="", collapse=""), paste("2. ", input$element2, sep="", collapse=""), paste("3. ", input$element3, sep="", collapse="")),
+    values=c(input$elementcolor1, input$elementcolor2, input$elementcolor3)) +
+    coord_equal() +
+    guides(alpha=FALSE) +
+    theme_classic()
+    
+    
+    spectral.int.map
+    
+})
+
+
+output$multiMap <- renderPlot({
+    print(plotInputMultiple())
+})
+
+
+output$downloadmultimap <- downloadHandler(
+filename = function() { paste(input$project, "_", input$element1, "_", input$element2, "_", input$element3, "_", '.tiff', sep='') },
+content = function(file) {
+    ggsave(file,plotInputMultiple(), width=7, height=7, dpi=300, device="tiff")
+}
+)
+
+
+ 
 
 
 })
