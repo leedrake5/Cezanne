@@ -386,7 +386,7 @@ output$threeMap <- renderPlot({
 
 
 output$downloadmultimap <- downloadHandler(
-filename = function() { paste(input$project, "_", input$threeelement1, "_", input$threeelement2, "_", input$threeelement3, "_", '.tiff', sep='') },
+filename = function() { paste(input$project, "_", input$threeelement1, "_", input$threeelement2, "_", input$threeelement3, '.tiff', sep='') },
 content = function(file) {
     ggsave(file,plotInputThree(), width=7, height=7, dpi=300, device="tiff")
 }
@@ -557,7 +557,7 @@ output$fiveMap <- renderPlot({
 
 
 output$downloadfivemap <- downloadHandler(
-filename = function() { paste(input$project, "_", input$fiveelement1, "_", input$fiveelement2, "_", input$fiveelement3, "_", input$fiveelement4, "_", input$fiveelement5, "_", '.tiff', sep='') },
+filename = function() { paste(input$project, "_", input$fiveelement1, "_", input$fiveelement2, "_", input$fiveelement3, "_", input$fiveelement4, "_", input$fiveelement5,  '.tiff', sep='') },
 content = function(file) {
     ggsave(file,plotInputFive(), width=7, height=7, dpi=300, device="tiff")
 }
