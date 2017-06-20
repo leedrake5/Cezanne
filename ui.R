@@ -53,7 +53,9 @@ sliderInput("resolution", label = "Interpolation Resolution", value=400, min=10,
 
 tags$hr(),
 
-downloadButton(outputId="downloadmap", label="Download")
+downloadButton(outputId="downloadmap", label="Download Tiff"),
+downloadButton(outputId="downloadmapjpg", label="Download JPG")
+
 
 ),
 
@@ -106,7 +108,9 @@ sliderInput("resolutionmulti", label = "Interpolation Resolution", value=400, mi
 
 tags$hr(),
 
-downloadButton(outputId="downloadthreemap", label="Download")
+downloadButton(outputId="downloadthreemap", label="Download Tiff"),
+downloadButton(outputId="downloadthreemapjpg", label="Download JPG")
+
 
 
 ),
@@ -186,7 +190,8 @@ sliderInput("resolutionmulti", label = "Interpolation Resolution", value=400, mi
 
 tags$hr(),
 
-downloadButton(outputId="downloadfivemap", label="Download")
+downloadButton(outputId="downloadfivemap", label="Download Tiff"),
+downloadButton(outputId="downloadfivemapjpg", label="Download JPG")
 
 
 ),

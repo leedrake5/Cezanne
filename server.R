@@ -266,6 +266,15 @@ content = function(file) {
 )
 
 
+output$downloadmapjpg <- downloadHandler(
+filename = function() { paste(input$project, "_", input$elements, "_", input$lines, '.jpg', sep='') },
+content = function(file) {
+    ggsave(file,plotInputSingle(), width=7, height=7, dpi=300, device="jpg")
+}
+)
+
+
+
 dataSplit3 <- reactive({
     
     fishImport <- myData()
@@ -389,6 +398,13 @@ output$downloadmultimap <- downloadHandler(
 filename = function() { paste(input$project, "_", input$threeelement1, "_", input$threeelement2, "_", input$threeelement3, '.tiff', sep='') },
 content = function(file) {
     ggsave(file,plotInputThree(), width=7, height=7, dpi=300, device="tiff")
+}
+)
+
+output$downloadmultimapjpg <- downloadHandler(
+filename = function() { paste(input$project, "_", input$threeelement1, "_", input$threeelement2, "_", input$threeelement3, '.jpg', sep='') },
+content = function(file) {
+    ggsave(file,plotInputThree(), width=7, height=7, dpi=300, device="jpg")
 }
 )
 
@@ -562,6 +578,14 @@ content = function(file) {
     ggsave(file,plotInputFive(), width=7, height=7, dpi=300, device="tiff")
 }
 )
+
+output$downloadfivemap <- downloadHandler(
+filename = function() { paste(input$project, "_", input$fiveelement1, "_", input$fiveelement2, "_", input$fiveelement3, "_", input$fiveelement4, "_", input$fiveelement5,  '.jpg', sep='') },
+content = function(file) {
+    ggsave(file,plotInputFive(), width=7, height=7, dpi=300, device="jpg")
+}
+)
+
 
 
  
