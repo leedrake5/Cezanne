@@ -14,10 +14,14 @@ sidebarPanel(
 actionButton("actionprocess", label = "Process Data"),
 tags$hr(),
 
-
 fileInput('file1', 'Choose file to upload',
 accept = c('.csv'), multiple=TRUE
 ),
+
+tags$hr(),
+
+fileInput('calfileinput', 'Load Cal File', accept='.quant', multiple=FALSE),
+checkboxInput('usecalfile', "Use Cal File"),
 
 tags$hr(),
 
@@ -32,11 +36,7 @@ tags$hr(),
 
 selectInput(
 "colorramp", "Color Ramp",
-c("Terrain" = "terrain.colors(",
-"Rainbow" = "rainbow(",
-"Heat" = "heat.colors(",
-"Topo" = "topo.colors(",
-"CM" = "cm.colors("),
+c("Terrain" = "terrain.colors(", "Rainbow" = "rainbow(", "Heat" = "heat.colors(", "Topo" = "topo.colors(", "CM" = "cm.colors("),
 
 selected="Terrain"),
 
@@ -46,29 +46,27 @@ tags$hr(),
 
 sliderInput('threshhold', label="Threshold", value=0.1, min=0, max=1),
 
-
 tags$hr(),
 
-sliderInput("resolution", label = "Interpolation Resolution", value=400, min=10, max=1000),
+sliderInput("resolution", label = "Interpolation Resolution", value=400, min=1, max=1000),
 
 tags$hr(),
-
-downloadButton(outputId="downloadmap", label="Download Tiff"),
-downloadButton(outputId="downloadmapjpg", label="Download JPG")
-
-
+downloadButton(outputId="downloadtable", label="Table"),
+downloadButton(outputId="downloadmap", label="Tiff"),
+downloadButton(outputId="downloadmapjpg", label="JPG")
 ),
 
 mainPanel(
 fluidRow(
-column(width = 11, class = "well",
+div(
+style = "position:relative",
 plotOutput("simpleMap", height = 800,
 dblclick = "plot1_dblclick",
-brush = brushOpts(
-id = "plot1_brush",
-resetOnNew = TRUE
-)))))
-)),
+brush = brushOpts( id = "plot1_brush", resetOnNew = TRUE),
+hover = hoverOpts("plot_hoversimp", delay = 100, delayType = "debounce")),
+uiOutput("hover_infosimp")))
+))
+),
 
 tabPanel("Three Element Map",
 titlePanel("Three Element Plot"),
@@ -117,16 +115,16 @@ downloadButton(outputId="downloadthreemapjpg", label="Download JPG")
 
 mainPanel(
 fluidRow(
-column(width = 11, class = "well",
+div(
+style = "position:relative",
 plotOutput("threeMap", height = 800,
 dblclick = "plot1_dblclick",
-brush = brushOpts(
-id = "plot1_brush",
-resetOnNew = TRUE
+brush = brushOpts(id = "plot1_brush", resetOnNew = TRUE),
+hover = hoverOpts("plot_hover3", delay = 100, delayType = "debounce")
+),
+uiOutput("hover_info3"))
+
 ))
-
-
-)))
 
 
 )
@@ -198,16 +196,17 @@ downloadButton(outputId="downloadfivemapjpg", label="Download JPG")
 
 mainPanel(
 fluidRow(
-column(width = 11, class = "well",
+div(
+style = "position:relative",
 plotOutput("fiveMap", height = 800,
 dblclick = "plot1_dblclick",
-brush = brushOpts(
-id = "plot1_brush",
-resetOnNew = TRUE
+brush = brushOpts(id = "plot1_brush", resetOnNew = TRUE),
+hover = hoverOpts("plot_hover5", delay = 100, delayType = "debounce")),
+uiOutput("hover_info5"))
+
+
+
 ))
-
-
-)))
 
 
 )

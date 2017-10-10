@@ -10,7 +10,6 @@ library(data.table)
 library(pbapply)
 library(R.utils)
 library(R.oo)
-library(Biobase)
 library(plyr)
 library(dplyr)
 
@@ -18,6 +17,11 @@ library(ggplot2)
 library(reshape2)
 library(pbapply)
 library(akima)
+
+options(shiny.maxRequestSize=9000000*1024^2)
+
+options(warn=-1)
+assign("last.warning", NULL, envir = baseenv())
 
 
 # Define server logic required to draw a histogram
@@ -27,7 +31,7 @@ shinyServer(function(input, output) {
     
     observeEvent(input$actionprocess, {
         
-        myData <- reactive({
+        myDataHold <- reactive({
             
             withProgress(message = 'Processing Data', value = 0, {
                 
@@ -80,8 +84,235 @@ shinyServer(function(input, output) {
         
       
 
+
+calFileContents <- reactive({
+    
+    existingCalFile <- input$calfileinput
+    
+    if (is.null(existingCalFile)) return(NULL)
+    
+    
+    Calibration <- readRDS(existingCalFile$datapath)
+    
+    Calibration
+    
+})
+
+
+
+
+
+calValHold <- reactive({
+    
+    
+    calFileContents()[[6]]
+    
+    
+    
+    
+    
+})
+
+calVariables <- reactive({
+    
+    
+    calFileContents()$Intensities
+    
+    
+    
+})
+
+
+
+
+calValElements <- reactive({
+    calList <- calValHold()
+    valelements <- ls(calList)
+    valelements
+})
+
+calVariableElements <- reactive({
+    variables <- calVariables()
+    variableelements <- ls(variables)
+    variableelements
+})
+
+
+
+fullInputValCounts <- reactive({
+    valelements <- calValElements()
+    variableelements <- calVariableElements()
+    val.data <- myDataHold()
+    
+    
+    
+    all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
+    merge.label <- paste(val.data$Element, val.data$Line, sep=".")
+    merge.coord <- paste(val.data$x, val.data$y, sep="-")
+    
+    simple.val.frame <- data.frame(merge.coord, merge.label, val.data$Net)
+    colnames(simple.val.frame) <- c("Spectrum", "Element", "Net")
+    
+    rh.vals <- subset(simple.val.frame$Net, simple.val.frame$Element=="Rh.L1")
+   
+    
+    norm.val <- mean(rh.vals)/mean(calFileContents()$Spectra$Rh.L1)
+    
+    norm.val.frame <- data.frame(merge.coord, merge.label, simple.val.frame$Net/norm.val)
+    colnames(norm.val.frame) <- c("Spectrum", "Element", "Net")
+
+    
+    val.line.table <- dcast(data=norm.val.frame, formula=Spectrum ~ Element,  fun.aggregate=mean)
+
+    val.line.table
+})
+
+
+
+
+
+
+
+tableInputValQuant <- reactive({
+    
+    
+    count.table <- data.frame(fullInputValCounts())
+    the.cal <- calValHold()
+    elements.cal <- calValElements()
+    elements <- elements.cal[!is.na(match(elements.cal, ls(count.table)))]
+    variables <- calVariableElements()
+    valdata <- myDataHold()
+    
     
 
+    
+    predicted.list <- pblapply(elements, function (x)
+    if(the.cal[[x]][[1]]$CalTable$CalType!=3 && the.cal[[x]][[1]]$CalTable$NormType==1){
+        predict(
+        object=the.cal[[x]][[2]],
+        newdata=general.prep.net(
+        spectra.line.table=as.data.frame(
+        count.table
+        ),
+        element.line=x)
+        )
+    } else if(the.cal[[x]][[1]]$CalTable$CalType!=3 && the.cal[[x]][[1]]$CalTable$NormType==2) {
+        predict(
+        object=the.cal[[x]][[2]],
+        newdata=simple.tc.prep.net(
+        data=valdata,
+        spectra.line.table=as.data.frame(
+        count.table
+        ),
+        element.line=x
+        )
+        )
+    } else if(the.cal[[x]][[1]]$CalTable$CalType!=3 && the.cal[[x]][[1]]$CalTable$NormType==3) {
+        predict(
+        object=the.cal[[x]][[2]],
+        newdata=simple.comp.prep.net(
+        data=valdata,
+        spectra.line.table=as.data.frame(
+        count.table
+        ),
+        element.line=x,
+        norm.min=the.cal[[x]][[1]][1]$CalTable$Min,
+        norm.max=the.cal[[x]][[1]][1]$CalTable$Max
+        )
+        )
+    } else if(the.cal[[x]][[1]]$CalTable$CalType==3 && the.cal[[x]][[1]]$CalTable$NormType==1){
+        predict(
+        object=the.cal[[x]][[2]],
+        newdata=lucas.simp.prep.net(
+        spectra.line.table=as.data.frame(
+        count.table
+        ),
+        element.line=x,
+        slope.element.lines=the.cal[[x]][[1]][2]$Slope,
+        intercept.element.lines=the.cal[[x]][[1]][3]$Intercept
+        )
+        )
+    } else if(the.cal[[x]][[1]]$CalTable$CalType==3 && the.cal[[x]][[1]]$CalTable$NormType==2){
+        predict(
+        object=the.cal[[x]][[2]],
+        newdata=lucas.tc.prep.net(
+        data=valdata,
+        spectra.line.table=as.data.frame(
+        count.table
+        ),
+        element.line=x,
+        slope.element.lines=the.cal[[x]][[1]][2]$Slope,
+        intercept.element.lines=the.cal[[x]][[1]][3]$Intercept
+        )
+        )
+    } else if(the.cal[[x]][[1]]$CalTable$CalType==3 && the.cal[[x]][[1]]$CalTable$NormType==3){
+        predict(
+        object=the.cal[[x]][[2]],
+        newdata=lucas.comp.prep.net(
+        data=valdata,
+        spectra.line.table=as.data.frame(
+        count.table
+        ),
+        element.line=x,
+        slope.element.lines=the.cal[[x]][[1]][2]$Slope,
+        intercept.element.lines=the.cal[[x]][[1]][3]$Intercept,
+        norm.min=the.cal[[x]][[1]][1]$CalTable$Min,
+        norm.max=the.cal[[x]][[1]][1]$CalTable$Max
+        )
+        )
+    }
+    
+    
+    
+    )
+    
+    predicted.vector <- unlist(predicted.list)
+    
+    dim(predicted.vector) <- c(length(count.table$Spectrum), length(elements))
+    
+    predicted.frame <- data.frame(count.table$Spectrum, predicted.vector)
+    
+    colnames(predicted.frame) <- c("Spectrum", elements)
+    
+    melt.frame <- melt(predicted.frame, id="Spectrum")
+    
+    colnames(melt.frame) <- c("Spectrum", "Element", "CPS")
+    
+    
+    x <- as.numeric(gsub("[-][\\s\\S]*$", "", melt.frame$Spectrum, perl=T))
+    y <- as.numeric(sub('.*\\-', '', melt.frame$Spectrum))
+
+    
+    element.char <- gsub("[.][\\s\\S]*$", "", melt.frame$Element, perl=T)
+    line.char <- sub('.*\\.', '', melt.frame$Element)
+    
+    reform.table <- data.frame(element.char, line.char, melt.frame$CPS, x, y)
+    colnames(reform.table) <- c( "Element", "Line", "Net", "x", "y")
+
+    reform.table
+    #predicted.values <- t(predicted.values)
+    
+    
+})
+
+myData <- reactive({
+    
+    if(input$usecalfile==FALSE){
+        myDataHold()
+    } else if(input$usecalfile==TRUE){
+        tableInputValQuant()
+    }
+    
+})
+
+
+output$downloadtable <- downloadHandler(
+filename = function() { paste(input$project, '.csv', sep='', collapse='') },
+content = function(file
+) {
+    write.csv(myData(), file)
+}
+)
 
 #data.m <- metadataTableRe()
 
@@ -195,13 +426,7 @@ output$in5Line5 <- renderUI({
 })
 
 
-
-
-
-plotInputSingle <- reactive({
-    
-    colvals = as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
-    
+plotSinglePrep <- reactive({
     fishImport <- myData()
     
     fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
@@ -227,12 +452,23 @@ plotInputSingle <- reactive({
     fish.int.melt$x <- fish.int$x[fish.int.melt$x]
     fish.int.melt$y <- fish.int$y[fish.int.melt$y]
     
-    fish.int.melt$z <- transform_0_1(fish.int.melt$z)
+    fish.int.melt$altz <- transform_0_1(fish.int.melt$z)
     
     
     fish.int.melt[is.na(fish.int.melt)] <- 0
     
-    fish.int.melt <- subset(fish.int.melt, z > input$threshhold)
+    fish.int.melt <- subset(fish.int.melt, altz > input$threshhold)
+    
+    fish.int.melt
+    
+})
+
+
+plotInputSingle <- reactive({
+    
+    colvals = as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
+    
+   fish.int.melt <- plotSinglePrep()
 
     
     
@@ -254,7 +490,46 @@ plotInputSingle <- reactive({
 
 
 output$simpleMap <- renderPlot({
-    print(plotInputSingle())
+    plotInputSingle()
+})
+
+
+# Float over info
+output$hover_infosimp <- renderUI({
+    
+    point.table <- plotSinglePrep()
+    
+    
+    hover <- input$plot_hoversimp
+    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
+    #if (nrow(point) == 0) return(NULL)
+    
+    
+    
+    
+    # calculate point position INSIDE the image as percent of total dimensions
+    # from left (horizontal) and from top (vertical)
+    left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+    top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+    
+    # calculate distance from left and bottom side of the picture in pixels
+    left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+    top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+    
+    
+    # create style property fot tooltip
+    # background color is set so tooltip is a bit transparent
+    # z-index is set so we are sure are tooltip will be on top
+    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+    
+    # actual tooltip created as wellPanel
+    wellPanel(
+    style = style,
+    p(HTML(paste0(input$elements, ": ", round(point$z, 4)
+    
+    )))
+    )
 })
 
 
@@ -302,12 +577,12 @@ dataSplit3 <- reactive({
     fish.int.melt.1$x <- fish.int.1$x[fish.int.melt.1$x]
     fish.int.melt.1$y <- fish.int.1$y[fish.int.melt.1$y]
     
-    fish.int.melt.1$z <- transform_0_1(fish.int.melt.1$z)
+    fish.int.melt.1$altz <- transform_0_1(fish.int.melt.1$z)
     
     
     fish.int.melt.1[is.na(fish.int.melt.1)] <- 0
     
-    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$z > input$thresh3hold1)
+    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh3hold1)
     
     
     #   fish.int.melt.1$z <- fish.int.melt.1$z[ fish.int.melt.1$z<0.1 ] <- 0
@@ -320,12 +595,12 @@ dataSplit3 <- reactive({
     fish.int.melt.2$x <- fish.int.2$x[fish.int.melt.2$x]
     fish.int.melt.2$y <- fish.int.2$y[fish.int.melt.2$y]
     
-    fish.int.melt.2$z <- transform_0_1(fish.int.melt.2$z)
+    fish.int.melt.2$altz <- transform_0_1(fish.int.melt.2$z)
     
     
     fish.int.melt.2[is.na(fish.int.melt.2)] <- 0
     
-    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$z > input$thresh3hold2)
+    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$altz > input$thresh3hold2)
     
     #fish.int.melt.2$z <- fish.int.melt.2$z[ fish.int.melt.2$z<0.1 ] <- 0
     
@@ -337,12 +612,12 @@ dataSplit3 <- reactive({
     fish.int.melt.3$x <- fish.int.3$x[fish.int.melt.3$x]
     fish.int.melt.3$y <- fish.int.3$y[fish.int.melt.3$y]
     
-    fish.int.melt.3$z <- transform_0_1(fish.int.melt.3$z)
+    fish.int.melt.3$altz <- transform_0_1(fish.int.melt.3$z)
     
     
     fish.int.melt.3[is.na(fish.int.melt.3)] <- 0
     
-    fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$z > input$thresh3hold3)
+    fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$altz > input$thresh3hold3)
     
     #fish.int.melt.3$z <- fish.int.melt.3$z[ fish.int.melt.3$z<0.1 ] <- 0
     
@@ -390,7 +665,56 @@ plotInputThree <- reactive({
 
 
 output$threeMap <- renderPlot({
-    print(plotInputThree())
+    plotInputThree()
+})
+
+# Float over info
+output$hover_info3 <- renderUI({
+    
+    point.table <- dataSplit3()
+    
+    
+    
+    
+    
+    hover <- input$plot_hover3
+    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
+    if (nrow(point) == 0) return(NULL)
+    
+    point.table.rev <- filter(point.table,
+    x %in% point$x,
+    y %in% point$y)
+    
+    z1 <- round(filter(point.table.rev, Element %in% input$threeelement1)$z, 4)
+    z2 <- round(filter(point.table.rev, Element %in% input$threeelement2)$z, 4)
+    z3 <- round(filter(point.table.rev, Element %in% input$threeelement3)$z, 4)
+    
+    
+    # calculate point position INSIDE the image as percent of total dimensions
+    # from left (horizontal) and from top (vertical)
+    left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+    top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+    
+    # calculate distance from left and bottom side of the picture in pixels
+    left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+    top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+    
+    
+    # create style property fot tooltip
+    # background color is set so tooltip is a bit transparent
+    # z-index is set so we are sure are tooltip will be on top
+    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+    
+    # actual tooltip created as wellPanel
+    wellPanel(
+    style = style,
+    p(HTML(paste0(input$threeelement1, ": ", z1, "<br/>",
+    input$threeelement2, ": ", z2, "<br/>",
+    input$threeelement3, ": ", z3
+    
+    )))
+    )
 })
 
 
@@ -442,12 +766,12 @@ dataSplit5 <- reactive({
     fish.int.melt.1$x <- fish.int.1$x[fish.int.melt.1$x]
     fish.int.melt.1$y <- fish.int.1$y[fish.int.melt.1$y]
     
-    fish.int.melt.1$z <- transform_0_1(fish.int.melt.1$z)
+    fish.int.melt.1$altz <- transform_0_1(fish.int.melt.1$z)
     
     
     fish.int.melt.1[is.na(fish.int.melt.1)] <- 0
     
-    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$z > input$thresh5hold1)
+    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh5hold1)
     
     
     #   fish.int.melt.1$z <- fish.int.melt.1$z[ fish.int.melt.1$z<0.1 ] <- 0
@@ -460,12 +784,12 @@ dataSplit5 <- reactive({
     fish.int.melt.2$x <- fish.int.2$x[fish.int.melt.2$x]
     fish.int.melt.2$y <- fish.int.2$y[fish.int.melt.2$y]
     
-    fish.int.melt.2$z <- transform_0_1(fish.int.melt.2$z)
+    fish.int.melt.2$altz <- transform_0_1(fish.int.melt.2$z)
     
     
     fish.int.melt.2[is.na(fish.int.melt.2)] <- 0
     
-    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$z > input$thresh5hold2)
+    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$altz > input$thresh5hold2)
     
     #fish.int.melt.2$z <- fish.int.melt.2$z[ fish.int.melt.2$z<0.1 ] <- 0
     
@@ -477,12 +801,12 @@ dataSplit5 <- reactive({
     fish.int.melt.3$x <- fish.int.3$x[fish.int.melt.3$x]
     fish.int.melt.3$y <- fish.int.3$y[fish.int.melt.3$y]
     
-    fish.int.melt.3$z <- transform_0_1(fish.int.melt.3$z)
+    fish.int.melt.3$altz <- transform_0_1(fish.int.melt.3$z)
     
     
     fish.int.melt.3[is.na(fish.int.melt.3)] <- 0
     
-    fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$z > input$thresh5hold3)
+    fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$altz > input$thresh5hold3)
     
     #fish.int.melt.3$z <- fish.int.melt.3$z[ fish.int.melt.3$z<0.1 ] <- 0
 
@@ -494,12 +818,12 @@ dataSplit5 <- reactive({
     fish.int.melt.4$x <- fish.int.4$x[fish.int.melt.4$x]
     fish.int.melt.4$y <- fish.int.4$y[fish.int.melt.4$y]
     
-    fish.int.melt.4$z <- transform_0_1(fish.int.melt.4$z)
+    fish.int.melt.4$altz <- transform_0_1(fish.int.melt.4$altz)
     
     
     fish.int.melt.4[is.na(fish.int.melt.4)] <- 0
     
-    fish.int.melt.4 <- subset(fish.int.melt.4, fish.int.melt.4$z > input$thresh5hold4)
+    fish.int.melt.4 <- subset(fish.int.melt.4, fish.int.melt.4$altz > input$thresh5hold4)
     
     #fish.int.melt.4$z <- fish.int.melt.4$z[ fish.int.melt.4$z<0.1 ] <- 0
     
@@ -511,7 +835,7 @@ dataSplit5 <- reactive({
     fish.int.melt.5$x <- fish.int.5$x[fish.int.melt.5$x]
     fish.int.melt.5$y <- fish.int.5$y[fish.int.melt.5$y]
     
-    fish.int.melt.5$z <- transform_0_1(fish.int.melt.5$z)
+    fish.int.melt.5$altz <- transform_0_1(fish.int.melt.5$altz)
     
     
     fish.int.melt.5[is.na(fish.int.melt.5)] <- 0
@@ -568,7 +892,45 @@ plotInputFive <- reactive({
 
 
 output$fiveMap <- renderPlot({
-    print(plotInputFive())
+    plotInputFive()
+})
+
+# Float over info
+output$hover_info5 <- renderUI({
+    
+    point.table <- dataSplit5()
+    
+    
+    hover <- input$plot_hover5
+    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
+    #if (nrow(point) == 0) return(NULL)
+    
+    
+    
+    
+    # calculate point position INSIDE the image as percent of total dimensions
+    # from left (horizontal) and from top (vertical)
+    left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+    top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+    
+    # calculate distance from left and bottom side of the picture in pixels
+    left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+    top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+    
+    
+    # create style property fot tooltip
+    # background color is set so tooltip is a bit transparent
+    # z-index is set so we are sure are tooltip will be on top
+    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+    
+    # actual tooltip created as wellPanel
+    wellPanel(
+    style = style,
+    p(HTML(paste0(point$Spectrum
+    
+    )))
+    )
 })
 
 
