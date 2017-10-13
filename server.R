@@ -29,7 +29,7 @@ shinyServer(function(input, output) {
     
     
     
-    observeEvent(input$actionprocess, {
+    observeEvent(is.null(input$file1)==FALSE, {
         
         myDataHold <- reactive({
             
@@ -153,10 +153,10 @@ fullInputValCounts <- reactive({
     simple.val.frame <- data.frame(merge.coord, merge.label, val.data$Net)
     colnames(simple.val.frame) <- c("Spectrum", "Element", "Net")
     
-    rh.vals <- subset(simple.val.frame$Net, simple.val.frame$Element=="Rh.L1")
+    rh.vals <- subset(simple.val.frame$Net, simple.val.frame$Element==input$rhscale)
    
     
-    norm.val <- mean(rh.vals)/mean(calFileContents()$Spectra$Rh.L1)
+    norm.val <- rh.vals/mean(calFileContents()$Spectra[,input$rhscale])*input$scalefactor
     
     norm.val.frame <- data.frame(merge.coord, merge.label, simple.val.frame$Net/norm.val)
     colnames(norm.val.frame) <- c("Spectrum", "Element", "Net")
@@ -359,7 +359,7 @@ output$inLines <- renderUI({
 
 ####Three Element Plot
 output$in3Element1 <- renderUI({
-    selectInput(inputId = "threeelement1", label = h4("Element"), choices =  outElements(), selected="Fe")
+    selectInput(inputId = "threeelement1", label = h4("Element"), choices =  outElements(), selected=outElements()[1])
 })
 
 output$in3Line1 <- renderUI({
@@ -367,7 +367,7 @@ output$in3Line1 <- renderUI({
 })
 
 output$in3Element2 <- renderUI({
-    selectInput(inputId = "threeelement2", label = h4("Element"), choices =  outElements(), selected="Co")
+    selectInput(inputId = "threeelement2", label = h4("Element"), choices =  outElements(), selected=outElements()[2])
 })
 
 output$in3Line2 <- renderUI({
@@ -375,18 +375,18 @@ output$in3Line2 <- renderUI({
 })
 
 output$in3Element3 <- renderUI({
-    selectInput(inputId = "threeelement3", label = h4("Element"), choices =  outElements(), selected="Pb")
+    selectInput(inputId = "threeelement3", label = h4("Element"), choices =  outElements(), selected=outElements()[3])
 })
 
 output$in3Line3 <- renderUI({
-    selectInput(inputId = "threeline3", label = h4("Fluorescence Line"), choices =  outLines(), selected="L1")
+    selectInput(inputId = "threeline3", label = h4("Fluorescence Line"), choices =  outLines())
 })
 
 
 
 ####Five Element Plot
 output$in5Element1 <- renderUI({
-    selectInput(inputId = "fiveelement1", label = h4("Element"), choices =  outElements(), selected="Fe")
+    selectInput(inputId = "fiveelement1", label = h4("Element"), choices =  outElements(), selected=outElements()[1])
 })
 
 output$in5Line1 <- renderUI({
@@ -394,7 +394,7 @@ output$in5Line1 <- renderUI({
 })
 
 output$in5Element2 <- renderUI({
-    selectInput(inputId = "fiveelement2", label = h4("Element"), choices =  outElements(), selected="Zn")
+    selectInput(inputId = "fiveelement2", label = h4("Element"), choices =  outElements(), selected=outElements()[2])
 })
 
 output$in5Line2 <- renderUI({
@@ -402,15 +402,15 @@ output$in5Line2 <- renderUI({
 })
 
 output$in5Element3 <- renderUI({
-    selectInput(inputId = "fiveelement3", label = h4("Element"), choices =  outElements(), selected="Pb")
+    selectInput(inputId = "fiveelement3", label = h4("Element"), choices =  outElements(), selected=outElements()[3])
 })
 
 output$in5Line3 <- renderUI({
-    selectInput(inputId = "fiveline3", label = h4("Fluorescence Line"), choices =  outLines(), selected="L1")
+    selectInput(inputId = "fiveline3", label = h4("Fluorescence Line"), choices =  outLines())
 })
 
 output$in5Element4 <- renderUI({
-    selectInput(inputId = "fiveelement4", label = h4("Element"), choices =  outElements(), selected="Co")
+    selectInput(inputId = "fiveelement4", label = h4("Element"), choices =  outElements(), selected=outElements()[4])
 })
 
 output$in5Line4 <- renderUI({
@@ -418,15 +418,15 @@ output$in5Line4 <- renderUI({
 })
 
 output$in5Element5 <- renderUI({
-    selectInput(inputId = "fiveelement5", label = h4("Element"), choices =  outElements(), selected="Hg")
+    selectInput(inputId = "fiveelement5", label = h4("Element"), choices =  outElements(), selected=outElements()[5])
 })
 
 output$in5Line5 <- renderUI({
-    selectInput(inputId = "fiveline5", label = h4("Fluorescence Line"), choices =  outLines(), selected="L1")
+    selectInput(inputId = "fiveline5", label = h4("Fluorescence Line"), choices =  outLines())
 })
 
-
-plotSinglePrep <- reactive({
+interpSinglePrep <- reactive({
+    
     fishImport <- myData()
     
     fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
@@ -455,27 +455,78 @@ plotSinglePrep <- reactive({
     fish.int.melt$altz <- transform_0_1(fish.int.melt$z)
     
     
-    fish.int.melt[is.na(fish.int.melt)] <- 0
-    
+    fish.int.melt$z <- ifelse(fish.int.melt$z < 0, 0, fish.int.melt$z)
     fish.int.melt <- subset(fish.int.melt, altz > input$threshhold)
     
     fish.int.melt
     
 })
 
+normSinglePrep <- reactive({
+    fishImport <- myData()
+    
+    fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
+    
+    
+    
+    fish.norm <- data.frame(fishSubset$x, fishSubset$y, fishSubset$Net)
+    colnames(fish.norm) <- c("x", "y", "z")
+    
+    fish.norm$altz <- transform_0_1(fish.norm$z)
+    
+    fish.norm[is.na(fish.norm)] <- 0
+    
+    
+    fish.norm
+   
+    
+})
+
+
+plotSinglePrep <- reactive({
+    
+  fish <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSinglePrep()
+    }
+    
+    fish <- subset(fish, altz > input$threshhold)
+
+
+    
+})
+
+output$downloadnorm <- downloadHandler(
+filename = function() { paste(input$project, '.csv', sep='', collapse='') },
+content = function(file
+) {
+    write.csv(plotSinglePrep(), file)
+}
+)
+
+
+
 
 plotInputSingle <- reactive({
+    input$actionprocess1
+
     
     colvals = as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
     
-   fish.int.melt <- plotSinglePrep()
+   isolate(fish <- plotSinglePrep())
+   
+   fish <- subset(fish, altz > input$threshhold)
+
+   
+   
 
     
     
-    spectral.int.map <- ggplot(fish.int.melt) +
-    geom_tile(aes(x, y,  fill=z, alpha=z)) +
+    ggplot(fish) +
+    geom_tile(aes(x, y,  fill=z, alpha=altz)) +
     #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-    scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+    scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
     scale_alpha_continuous("Net Counts", range=c(0, 1)) +
     coord_equal() +
     guides(alpha=FALSE) +
@@ -484,7 +535,7 @@ plotInputSingle <- reactive({
     theme_classic()
     
     
-        spectral.int.map
+  
     
 })
 
@@ -499,10 +550,11 @@ output$hover_infosimp <- renderUI({
     
     point.table <- plotSinglePrep()
     
+
     
     hover <- input$plot_hoversimp
     point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
-    #if (nrow(point) == 0) return(NULL)
+    if (nrow(point) == 0) return(NULL)
     
     
     
@@ -550,13 +602,12 @@ content = function(file) {
 
 
 
-dataSplit3 <- reactive({
+interpSplit3one <- reactive({
     
     fishImport <- myData()
     
     fishSubset1 <- fishImport %>% filter(Line==input$threeline1 & Element==input$threeelement1)
-    fishSubset2 <- fishImport %>% filter(Line==input$threeline2 & Element==input$threeelement2)
-    fishSubset3 <- fishImport %>% filter(Line==input$threeline3 & Element==input$threeelement3)
+
     
     ###Europe
     xmin <- min(fishSubset1$x)
@@ -579,13 +630,34 @@ dataSplit3 <- reactive({
     
     fish.int.melt.1$altz <- transform_0_1(fish.int.melt.1$z)
     
-    
+    fish.int.melt.1$z <- ifelse(fish.int.melt.1$z < 0, 0, fish.int.melt.1$z)
+
     fish.int.melt.1[is.na(fish.int.melt.1)] <- 0
     
-    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh3hold1)
+    
+    fish.int.melt.1
     
     
-    #   fish.int.melt.1$z <- fish.int.melt.1$z[ fish.int.melt.1$z<0.1 ] <- 0
+})
+
+
+interpSplit3two <- reactive({
+    
+    fishImport <- myData()
+    
+    fishSubset2 <- fishImport %>% filter(Line==input$threeline2 & Element==input$threeelement2)
+    
+    ###Europe
+    xmin <- min(fishSubset2$x)
+    xmax <- max(fishSubset2$x)
+    ymin <- min(fishSubset2$y)
+    ymax <- max(fishSubset2$y)
+    
+    x.range <- xmax-xmin
+    y.range <- ymax-ymin
+    
+    y.ratio <- y.range/x.range
+    
     
     
     fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
@@ -597,12 +669,32 @@ dataSplit3 <- reactive({
     
     fish.int.melt.2$altz <- transform_0_1(fish.int.melt.2$z)
     
+    fish.int.melt.2$z <- ifelse(fish.int.melt.2$z < 0, 0, fish.int.melt.2$z)
     
     fish.int.melt.2[is.na(fish.int.melt.2)] <- 0
     
-    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$altz > input$thresh3hold2)
     
-    #fish.int.melt.2$z <- fish.int.melt.2$z[ fish.int.melt.2$z<0.1 ] <- 0
+    fish.int.melt.2
+    
+})
+
+interpSplit3three <- reactive({
+    
+    fishImport <- myData()
+    
+    fishSubset3 <- fishImport %>% filter(Line==input$threeline3 & Element==input$threeelement3)
+    
+    ###Europe
+    xmin <- min(fishSubset3$x)
+    xmax <- max(fishSubset3$x)
+    ymin <- min(fishSubset3$y)
+    ymax <- max(fishSubset3$y)
+    
+    x.range <- xmax-xmin
+    y.range <- ymax-ymin
+    
+    y.ratio <- y.range/x.range
+    
     
     
     fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
@@ -614,39 +706,64 @@ dataSplit3 <- reactive({
     
     fish.int.melt.3$altz <- transform_0_1(fish.int.melt.3$z)
     
+    fish.int.melt.3$z <- ifelse(fish.int.melt.3$z < 0, 0, fish.int.melt.3$z)
     
     fish.int.melt.3[is.na(fish.int.melt.3)] <- 0
     
+    
+     fish.int.melt.3
+    
+
+})
+
+dataSplit3 <- reactive({
+    
+    fish.int.melt.1 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit3one()
+    }
+    
+    fish.int.melt.2 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit3two()
+    }
+    
+    fish.int.melt.3 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit3three()
+    }
+    
+    
+    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh3hold1)
+    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$altz > input$thresh3hold2)
     fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$altz > input$thresh3hold3)
-    
-    #fish.int.melt.3$z <- fish.int.melt.3$z[ fish.int.melt.3$z<0.1 ] <- 0
-    
-    #fish.merge <- data.frame(fish.int.melt.1$x, fish.int.melt.1$y, fish.int.melt.1$z, fish.int.melt.2$z, fish.int.melt.3$z)
-    #colnames(fish.merge) <- c("x", "y", "z1", "z2", "z3")
+
     
     fish.x <- c(fish.int.melt.1$x, fish.int.melt.2$x, fish.int.melt.3$x)
     fish.y <- c(fish.int.melt.1$y, fish.int.melt.2$y, fish.int.melt.3$y)
     fish.z <- c(fish.int.melt.1$z, fish.int.melt.2$z, fish.int.melt.3$z)
+    fish.altz <- c(fish.int.melt.1$altz, fish.int.melt.2$altz, fish.int.melt.3$altz)
     fish.element <- c(rep(paste("1. ", input$threeelement1, sep="", collapse=""), length(fish.int.melt.1$z)), rep(paste("2. ", input$threeelement2, sep="", collapse=""), length(fish.int.melt.2$z)), rep(paste("3. ", input$threeelement3, sep="", collapse=""), length(fish.int.melt.3$z)))
     
-    fish.merge <- data.frame(fish.x, fish.y, fish.z, fish.element)
-    colnames(fish.merge) <- c("x", "y", "z", "Element")
+    fish.merge <- data.frame(fish.x, fish.y, fish.z, fish.altz, fish.element)
+    colnames(fish.merge) <- c("x", "y", "z", "altz", "Element")
     fish.merge
 
-    
 })
 
 
-
-
 plotInputThree <- reactive({
-    
-    fish.merge <- dataSplit3()
+    input$actionprocess3
+
+    isolate(fish.merge <- dataSplit3())
     
     
 
     spectral.int.map <- ggplot(fish.merge, aes(x, y)) +
-    geom_tile(aes(fill=Element, alpha=z)) +
+    geom_tile(aes(fill=Element, alpha=altz)) +
     #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
     scale_alpha_continuous("Net Counts", range=c(0, 1)) +
     scale_fill_manual("Net Counts",
@@ -678,16 +795,10 @@ output$hover_info3 <- renderUI({
     
     
     hover <- input$plot_hover3
-    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
+    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 3, addDist = TRUE)
     if (nrow(point) == 0) return(NULL)
     
-    point.table.rev <- filter(point.table,
-    x %in% point$x,
-    y %in% point$y)
-    
-    z1 <- round(filter(point.table.rev, Element %in% input$threeelement1)$z, 4)
-    z2 <- round(filter(point.table.rev, Element %in% input$threeelement2)$z, 4)
-    z3 <- round(filter(point.table.rev, Element %in% input$threeelement3)$z, 4)
+
     
     
     # calculate point position INSIDE the image as percent of total dimensions
@@ -709,9 +820,9 @@ output$hover_info3 <- renderUI({
     # actual tooltip created as wellPanel
     wellPanel(
     style = style,
-    p(HTML(paste0(input$threeelement1, ": ", z1, "<br/>",
-    input$threeelement2, ": ", z2, "<br/>",
-    input$threeelement3, ": ", z3
+    p(HTML(paste0(input$threeelement1, ": ", round(point$z[1], 4), "<br/>",
+    input$threeelement2, ": ", round(point$z[2], 4), "<br/>",
+    input$threeelement3, ": ", round(point$z[3], 4)
     
     )))
     )
@@ -736,15 +847,11 @@ content = function(file) {
 
 
 
-dataSplit5 <- reactive({
+interpSplit5one <- reactive({
     
     fishImport <- myData()
     
     fishSubset1 <- fishImport %>% filter(Line==input$fiveline1 & Element==input$fiveelement1)
-    fishSubset2 <- fishImport %>% filter(Line==input$fiveline2 & Element==input$fiveelement2)
-    fishSubset3 <- fishImport %>% filter(Line==input$fiveline3 & Element==input$fiveelement3)
-    fishSubset4 <- fishImport %>% filter(Line==input$fiveline4 & Element==input$fiveelement4)
-    fishSubset5 <- fishImport %>% filter(Line==input$fiveline5 & Element==input$fiveelement5)
 
 
     ###Europe
@@ -768,13 +875,36 @@ dataSplit5 <- reactive({
     
     fish.int.melt.1$altz <- transform_0_1(fish.int.melt.1$z)
     
-    
+    fish.int.melt.1$z <- ifelse(fish.int.melt.1$z < 0, 0, fish.int.melt.1$z)
+
     fish.int.melt.1[is.na(fish.int.melt.1)] <- 0
     
-    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh5hold1)
+    
+    fish.int.melt.1
+
+    
+})
+
+
+interpSplit5two <- reactive({
+    
+    fishImport <- myData()
     
     
-    #   fish.int.melt.1$z <- fish.int.melt.1$z[ fish.int.melt.1$z<0.1 ] <- 0
+fishSubset2 <- fishImport %>% filter(Line==input$fiveline2 & Element==input$fiveelement2)
+
+    
+    ###Europe
+    xmin <- min(fishSubset2$x)
+    xmax <- max(fishSubset2$x)
+    ymin <- min(fishSubset2$y)
+    ymax <- max(fishSubset2$y)
+    
+    x.range <- xmax-xmin
+    y.range <- ymax-ymin
+    
+    y.ratio <- y.range/x.range
+    
     
     
     fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
@@ -786,12 +916,36 @@ dataSplit5 <- reactive({
     
     fish.int.melt.2$altz <- transform_0_1(fish.int.melt.2$z)
     
+    fish.int.melt.2$z <- ifelse(fish.int.melt.2$z < 0, 0, fish.int.melt.2$z)
     
     fish.int.melt.2[is.na(fish.int.melt.2)] <- 0
     
     fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$altz > input$thresh5hold2)
     
-    #fish.int.melt.2$z <- fish.int.melt.2$z[ fish.int.melt.2$z<0.1 ] <- 0
+    fish.int.melt.2
+    
+
+    
+})
+
+
+interpSplit5three <- reactive({
+    
+    fishImport <- myData()
+    
+    fishSubset3 <- fishImport %>% filter(Line==input$fiveline3 & Element==input$fiveelement3)
+    
+    
+    ###Europe
+    xmin <- min(fishSubset3$x)
+    xmax <- max(fishSubset3$x)
+    ymin <- min(fishSubset3$y)
+    ymax <- max(fishSubset3$y)
+    
+    x.range <- xmax-xmin
+    y.range <- ymax-ymin
+    
+    y.ratio <- y.range/x.range
     
     
     fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
@@ -803,14 +957,38 @@ dataSplit5 <- reactive({
     
     fish.int.melt.3$altz <- transform_0_1(fish.int.melt.3$z)
     
+    fish.int.melt.3$z <- ifelse(fish.int.melt.3$z < 0, 0, fish.int.melt.3$z)
     
     fish.int.melt.3[is.na(fish.int.melt.3)] <- 0
     
-    fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$altz > input$thresh5hold3)
     
-    #fish.int.melt.3$z <- fish.int.melt.3$z[ fish.int.melt.3$z<0.1 ] <- 0
+    fish.int.melt.3
+    
 
     
+    
+})
+
+
+interpSplit5four <- reactive({
+    
+    fishImport <- myData()
+    
+    fishSubset4 <- fishImport %>% filter(Line==input$fiveline4 & Element==input$fiveelement4)
+    
+    
+    ###Europe
+    xmin <- min(fishSubset4$x)
+    xmax <- max(fishSubset4$x)
+    ymin <- min(fishSubset4$y)
+    ymax <- max(fishSubset4$y)
+    
+    x.range <- xmax-xmin
+    y.range <- ymax-ymin
+    
+    y.ratio <- y.range/x.range
+    
+
     fish.int.4 <- with(fishSubset4, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.4 <- melt(fish.int.4$z, na.rm=TRUE)
     colnames(fish.int.melt.4) <- c("x", "y", "z")
@@ -818,16 +996,40 @@ dataSplit5 <- reactive({
     fish.int.melt.4$x <- fish.int.4$x[fish.int.melt.4$x]
     fish.int.melt.4$y <- fish.int.4$y[fish.int.melt.4$y]
     
-    fish.int.melt.4$altz <- transform_0_1(fish.int.melt.4$altz)
+    fish.int.melt.4$altz <- transform_0_1(fish.int.melt.4$z)
     
+    fish.int.melt.4$z <- ifelse(fish.int.melt.4$z < 0, 0, fish.int.melt.4$z)
     
     fish.int.melt.4[is.na(fish.int.melt.4)] <- 0
     
-    fish.int.melt.4 <- subset(fish.int.melt.4, fish.int.melt.4$altz > input$thresh5hold4)
     
-    #fish.int.melt.4$z <- fish.int.melt.4$z[ fish.int.melt.4$z<0.1 ] <- 0
+    fish.int.melt.4
+    
+
+    
+})
+
+interpSplit5five <- reactive({
+    
+    fishImport <- myData()
+    
+   
+    fishSubset5 <- fishImport %>% filter(Line==input$fiveline5 & Element==input$fiveelement5)
     
     
+    ###Europe
+    xmin <- min(fishSubset5$x)
+    xmax <- max(fishSubset5$x)
+    ymin <- min(fishSubset5$y)
+    ymax <- max(fishSubset5$y)
+    
+    x.range <- xmax-xmin
+    y.range <- ymax-ymin
+    
+    y.ratio <- y.range/x.range
+    
+    
+
     fish.int.5 <- with(fishSubset5, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.5 <- melt(fish.int.5$z, na.rm=TRUE)
     colnames(fish.int.melt.5) <- c("x", "y", "z")
@@ -835,16 +1037,59 @@ dataSplit5 <- reactive({
     fish.int.melt.5$x <- fish.int.5$x[fish.int.melt.5$x]
     fish.int.melt.5$y <- fish.int.5$y[fish.int.melt.5$y]
     
-    fish.int.melt.5$altz <- transform_0_1(fish.int.melt.5$altz)
+    fish.int.melt.5$altz <- transform_0_1(fish.int.melt.5$z)
     
+    fish.int.melt.5$z <- ifelse(fish.int.melt.5$z < 0, 0, fish.int.melt.5$z)
     
     fish.int.melt.5[is.na(fish.int.melt.5)] <- 0
     
-    fish.int.melt.5 <- subset(fish.int.melt.5, fish.int.melt.5$z > input$thresh5hold5)
     
-    #fish.int.melt.4$z <- fish.int.melt.4$z[ fish.int.melt.4$z<0.1 ] <- 0
-    
+    fish.int.melt.5
 
+    
+})
+
+dataSplit5 <- reactive({
+    
+    fish.int.melt.1 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit5one()
+    }
+    
+    fish.int.melt.2 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit5two()
+    }
+    
+    fish.int.melt.3 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit5three()
+    }
+    
+    fish.int.melt.4 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit5four()
+    }
+    
+    fish.int.melt.5 <- if(input$useinterp==FALSE){
+        normSinglePrep()
+    } else if(input$useinterp==TRUE){
+        interpSplit5five()
+    }
+    
+    
+    fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh5hold1)
+    fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$altz > input$thresh5hold2)
+    fish.int.melt.3 <- subset(fish.int.melt.3, fish.int.melt.3$altz > input$thresh5hold3)
+    fish.int.melt.4 <- subset(fish.int.melt.4, fish.int.melt.4$altz > input$thresh5hold4)
+    fish.int.melt.5 <- subset(fish.int.melt.5, fish.int.melt.5$altz > input$thresh5hold5)
+
+    
+    
     
     fish.x <- c(fish.int.melt.1$x, fish.int.melt.2$x, fish.int.melt.3$x, fish.int.melt.4$x, fish.int.melt.5$x)
     fish.y <- c(fish.int.melt.1$y, fish.int.melt.2$y, fish.int.melt.3$y, fish.int.melt.4$y, fish.int.melt.5$y)
@@ -860,15 +1105,12 @@ dataSplit5 <- reactive({
     colnames(fish.merge) <- c("x", "y", "z", "Element")
     fish.merge
     
-    
 })
 
-
-
-
 plotInputFive <- reactive({
-    
-    fish.merge <- dataSplit5()
+    input$actionprocess5
+
+    isolate(fish.merge <- dataSplit5())
     
     
     
@@ -902,7 +1144,7 @@ output$hover_info5 <- renderUI({
     
     
     hover <- input$plot_hover5
-    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
+    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 5, addDist = TRUE)
     #if (nrow(point) == 0) return(NULL)
     
     
@@ -927,8 +1169,12 @@ output$hover_info5 <- renderUI({
     # actual tooltip created as wellPanel
     wellPanel(
     style = style,
-    p(HTML(paste0(point$Spectrum
-    
+    p(HTML(paste0(input$fiveelement1, ": ", round(point$z[1], 4), "<br/>",
+    input$fiveelement2, ": ", round(point$z[2], 4), "<br/>",
+    input$fiveelement3, ": ", round(point$z[3], 4), "<br/>",
+    input$fiveelement4, ": ", round(point$z[4], 4), "<br/>",
+    input$fiveelement5, ": ", round(point$z[5], 4)
+
     )))
     )
 })
