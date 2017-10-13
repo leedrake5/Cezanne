@@ -67,8 +67,8 @@ fluidRow(
 div(
 style = "position:relative",
 plotOutput("simpleMap", height = 800,
-dblclick = "plot1_dblclick",
-brush = brushOpts( id = "plot1_brush", resetOnNew = TRUE),
+dblclick = "plot_1_dblclick",
+brush = brushOpts( id = "plot_1_brush", resetOnNew = TRUE),
 hover = hoverOpts("plot_hoversimp", delay = 100, delayType = "debounce")),
 uiOutput("hover_infosimp")))
 ))
@@ -126,8 +126,8 @@ fluidRow(
 div(
 style = "position:relative",
 plotOutput("threeMap", height = 800,
-dblclick = "plot1_dblclick",
-brush = brushOpts(id = "plot1_brush", resetOnNew = TRUE),
+dblclick = "plot_3_dblclick",
+brush = brushOpts(id = "plot_3_brush", resetOnNew = TRUE),
 hover = hoverOpts("plot_hover3", delay = 100, delayType = "debounce")
 ),
 uiOutput("hover_info3"))
@@ -208,8 +208,8 @@ fluidRow(
 div(
 style = "position:relative",
 plotOutput("fiveMap", height = 800,
-dblclick = "plot1_dblclick",
-brush = brushOpts(id = "plot1_brush", resetOnNew = TRUE),
+dblclick = "plot_5_dblclick",
+brush = brushOpts(id = "plot_5_brush", resetOnNew = TRUE),
 hover = hoverOpts("plot_hover5", delay = 100, delayType = "debounce")),
 uiOutput("hover_info5"))
 

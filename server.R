@@ -425,6 +425,9 @@ output$in5Line5 <- renderUI({
     selectInput(inputId = "fiveline5", label = h4("Fluorescence Line"), choices =  outLines())
 })
 
+ranges1 <- reactiveValues(x = NULL, y = NULL)
+
+
 interpSinglePrep <- reactive({
     
     fishImport <- myData()
@@ -528,7 +531,7 @@ plotInputSingle <- reactive({
     #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
     scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
     scale_alpha_continuous("Net Counts", range=c(0, 1)) +
-    coord_equal() +
+    coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
     guides(alpha=FALSE) +
     scale_x_continuous("X (mm)") +
     scale_y_continuous("Y (mm)") +
@@ -582,6 +585,18 @@ output$hover_infosimp <- renderUI({
     
     )))
     )
+})
+
+observeEvent(input$plot_1_dblclick, {
+    brush <- input$plot_1_brush
+    if (!is.null(brush)) {
+        ranges1$x <- c(brush$xmin, brush$xmax)
+        ranges1$y <- c(brush$ymin, brush$ymax)
+        
+    } else {
+        ranges1$x <- NULL
+        ranges1$y <- NULL
+    }
 })
 
 
@@ -716,6 +731,9 @@ interpSplit3three <- reactive({
 
 })
 
+ranges3 <- reactiveValues(x = NULL, y = NULL)
+
+
 dataSplit3 <- reactive({
     
     fish.int.melt.1 <- if(input$useinterp==FALSE){
@@ -750,7 +768,10 @@ dataSplit3 <- reactive({
     
     fish.merge <- data.frame(fish.x, fish.y, fish.z, fish.altz, fish.element)
     colnames(fish.merge) <- c("x", "y", "z", "altz", "Element")
+    
+    
     fish.merge
+
 
 })
 
@@ -769,7 +790,7 @@ plotInputThree <- reactive({
     scale_fill_manual("Net Counts",
     breaks=c(paste("1. ", input$threeelement1, sep="", collapse=""), paste("2. ", input$threeelement2, sep="", collapse=""), paste("3. ", input$threeelement3, sep="", collapse="")),
     values=c(input$element3color1, input$element3color2, input$element3color3)) +
-    coord_equal() +
+    coord_equal(xlim = ranges3$x, ylim = ranges3$y, expand = FALSE) +
     guides(alpha=FALSE) +
     scale_x_continuous("X (mm)") +
     scale_y_continuous("Y (mm)") +
@@ -787,6 +808,7 @@ output$threeMap <- renderPlot({
 
 # Float over info
 output$hover_info3 <- renderUI({
+    
     
     point.table <- dataSplit3()
     
@@ -820,9 +842,9 @@ output$hover_info3 <- renderUI({
     # actual tooltip created as wellPanel
     wellPanel(
     style = style,
-    p(HTML(paste0(input$threeelement1, ": ", round(point$z[1], 4), "<br/>",
-    input$threeelement2, ": ", round(point$z[2], 4), "<br/>",
-    input$threeelement3, ": ", round(point$z[3], 4)
+    p(HTML(paste0(input$threeelement1, ": ", round(as.numeric(point$z[1]), 4), "<br/>",
+    input$threeelement2, ": ", round(as.numeric(point$z[2]), 4), "<br/>",
+    input$threeelement3, ": ", round(as.numeric(point$z[3]), 4)
     
     )))
     )
@@ -843,8 +865,21 @@ content = function(file) {
 }
 )
 
+observeEvent(input$plot_3_dblclick, {
+    brush <- input$plot_3_brush
+    if (!is.null(brush)) {
+        ranges3$x <- c(brush$xmin, brush$xmax)
+        ranges3$y <- c(brush$ymin, brush$ymax)
+        
+    } else {
+        ranges3$x <- NULL
+        ranges3$y <- NULL
+    }
+})
 
 
+
+ranges5 <- reactiveValues(x = NULL, y = NULL)
 
 
 interpSplit5one <- reactive({
@@ -1121,7 +1156,7 @@ plotInputFive <- reactive({
     scale_fill_manual("Net Counts",
     breaks=c(paste("1. ", input$fiveelement1, sep="", collapse=""), paste("2. ", input$fiveelement2, sep="", collapse=""), paste("3. ", input$fiveelement3, sep="", collapse=""), paste("4. ", input$fiveelement4, sep="", collapse=""), paste("5. ", input$fiveelement5, sep="", collapse="")),
     values=c(input$element5color1, input$element5color2, input$element5color3, input$element5color4, input$element5color5)) +
-    coord_equal() +
+    coord_equal(xlim = ranges5$x, ylim = ranges5$y, expand = FALSE) +
     guides(alpha=FALSE) +
     scale_x_continuous("X (mm)") +
     scale_y_continuous("Y (mm)") +
@@ -1145,7 +1180,7 @@ output$hover_info5 <- renderUI({
     
     hover <- input$plot_hover5
     point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 5, addDist = TRUE)
-    #if (nrow(point) == 0) return(NULL)
+    if (nrow(point) == 0) return(NULL)
     
     
     
@@ -1177,6 +1212,19 @@ output$hover_info5 <- renderUI({
 
     )))
     )
+})
+
+
+observeEvent(input$plot_5_dblclick, {
+    brush <- input$plot_5_brush
+    if (!is.null(brush)) {
+        ranges5$x <- c(brush$xmin, brush$xmax)
+        ranges5$y <- c(brush$ymin, brush$ymax)
+        
+    } else {
+        ranges5$x <- NULL
+        ranges5$y <- NULL
+    }
 })
 
 
