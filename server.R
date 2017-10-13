@@ -549,8 +549,9 @@ output$simpleMap <- renderPlot({
 
 # Float over info
 output$hover_infosimp <- renderUI({
+    input$actionprocess1
     
-    point.table <- plotSinglePrep()
+    isolate(point.table <- plotSinglePrep())
     
 
     
@@ -807,9 +808,10 @@ output$threeMap <- renderPlot({
 
 # Float over info
 output$hover_info3 <- renderUI({
+    input$actionprocess3
+
     
-    
-    point.table <- dataSplit3()
+    isolate(point.table <- dataSplit3())
     
     
     
@@ -1174,7 +1176,9 @@ output$fiveMap <- renderPlot({
 # Float over info
 output$hover_info5 <- renderUI({
     
-    point.table <- dataSplit5()
+    input$actionprocess5
+
+    isolate(point.table <- dataSplit5())
     
     
     hover <- input$plot_hover5
