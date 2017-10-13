@@ -461,8 +461,8 @@ interpSinglePrep <- reactive({
     fish.int.melt$z <- ifelse(fish.int.melt$z < 0, 0, fish.int.melt$z)
     fish.int.melt <- subset(fish.int.melt, altz > input$threshhold)
     
-    fish.int.melt
-    
+    fish.int.melt[complete.cases(fish.int.melt), ]
+
 })
 
 normSinglePrep <- reactive({
@@ -519,7 +519,6 @@ plotInputSingle <- reactive({
     
    isolate(fish <- plotSinglePrep())
    
-   fish <- subset(fish, altz > input$threshhold)
 
    
    
@@ -770,7 +769,7 @@ dataSplit3 <- reactive({
     colnames(fish.merge) <- c("x", "y", "z", "altz", "Element")
     
     
-    fish.merge
+    fish.merge[complete.cases(fish.merge), ]
 
 
 })
@@ -1138,8 +1137,8 @@ dataSplit5 <- reactive({
     
     fish.merge <- data.frame(fish.x, fish.y, fish.z, fish.element)
     colnames(fish.merge) <- c("x", "y", "z", "Element")
-    fish.merge
-    
+    fish.merge[complete.cases(fish.merge), ]
+
 })
 
 plotInputFive <- reactive({
