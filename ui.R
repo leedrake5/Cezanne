@@ -20,6 +20,7 @@ accept = c('.csv'), multiple=TRUE
 
 radioButtons('filetype', "File Type", choices=c("Net", "Sheet"), selected="Net"),
 
+
 tags$hr(),
 
 fileInput('calfileinput', 'Load Cal File', accept='.quant', multiple=FALSE),
@@ -54,7 +55,7 @@ sliderInput('threshhold', label="Threshold", value=0.1, min=0, max=1),
 tags$hr(),
 
 checkboxInput("useinterp", label="Interpolation", value=TRUE),
-sliderInput("resolution", label = "Interpolation Resolution", value=400, min=10, max=10000),
+sliderInput("resolution", label = "Interpolation Resolution", value=100, min=10, max=10000),
 downloadButton(outputId="downloadnorm", label="normTable"),
 
 
@@ -111,7 +112,7 @@ sliderInput('thresh3hold3', label="Threshold", value=0.1, min=0, max=1),
 
 tags$hr(),
 
-sliderInput("resolutionmulti", label = "Interpolation Resolution", value=400, min=10, max=1000),
+sliderInput("resolutionmulti", label = "Interpolation Resolution", value=100, min=10, max=1000),
 
 
 tags$hr(),
@@ -193,7 +194,7 @@ sliderInput('thresh5hold5', label="Threshold", value=0.1, min=0, max=1),
 
 tags$hr(),
 
-sliderInput("resolutionmulti", label = "Interpolation Resolution", value=400, min=10, max=1000),
+sliderInput("resolutionmulti", label = "Interpolation Resolution", value=100, min=10, max=1000),
 
 
 

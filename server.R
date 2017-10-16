@@ -17,6 +17,8 @@ library(ggplot2)
 library(reshape2)
 library(pbapply)
 library(akima)
+library(parallel)
+
 
 options(shiny.maxRequestSize=9000000*1024^2)
 
@@ -42,11 +44,12 @@ shinyServer(function(input, output) {
             #inList <- list(inName, inPath)
             #names(inList) <- c("inName", "inPath")
             
+            core.n <- detectCores()-1
             
             n <- length(inFile$name)
             
-            my.x <- pblapply(inFile$name, function(x) read_csv_x(x))
-            my.y <- pblapply(inFile$name, function(x) read_csv_y(x))
+            my.x <- mclapply(inFile$name, function(x) read_csv_x(x), mc.cores=core.n)
+            my.y <- mclapply(inFile$name, function(x) read_csv_y(x), mc.cores=core.n)
             
             
             myfiles = pblapply(inFile$datapath, function(x) read_csv_net(x))
@@ -56,12 +59,12 @@ shinyServer(function(input, output) {
             
             all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
             
-            myfiles.list <- pblapply(myfiles.2, setNames, all.col.names)
+            myfiles.list <- mclapply(myfiles.2, setNames, all.col.names, mc.cores=core.n)
             
             
             
             
-            myfiles.frame <- do.call(rbind, lapply(myfiles.list, data.frame, stringsAsFactors=FALSE))
+            myfiles.frame <- do.call(rbind, mclapply(myfiles.list, data.frame, stringsAsFactors=FALSE, mc.cores=core.n))
             
             
             
@@ -206,7 +209,7 @@ tableInputValQuant <- reactive({
     variables <- calVariableElements()
     valdata <- myDataHold()
     
-    
+    core.n <- detectCores()-1
 
     
     predicted.list <- pblapply(elements, function (x)
@@ -286,7 +289,6 @@ tableInputValQuant <- reactive({
     }
     
     
-    
     )
     
     predicted.vector <- unlist(predicted.list)
@@ -320,15 +322,17 @@ tableInputValQuant <- reactive({
 
 myData <- reactive({
     
-    if(input$usecalfile==FALSE){
+    data <- if(input$usecalfile==FALSE){
         myDataHold()
     } else if(input$usecalfile==TRUE){
         tableInputValQuant()
     }
     
+    data[apply(data, 1, function(row) all(row !=0 )), ]
+    
 })
 
- })
+
 
 
 output$downloadtable <- downloadHandler(
@@ -520,6 +524,8 @@ plotSinglePrep <- reactive({
     }
     
     fish <- subset(fish, altz > input$threshhold)
+    
+    fish
 
 
     
@@ -1286,7 +1292,7 @@ content = function(file) {
 
 })
 
-
+ })
 
 
 
