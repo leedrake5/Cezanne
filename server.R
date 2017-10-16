@@ -29,59 +29,82 @@ shinyServer(function(input, output) {
     
     
     
+    netCounts <- reactive({
+        
+        withProgress(message = 'Processing Data', value = 0, {
+            
+            inFile <- input$file1
+            if (is.null(inFile)) return(NULL)
+            
+            #inName <- inFile$name
+            #inPath <- inFile$datapath
+            
+            #inList <- list(inName, inPath)
+            #names(inList) <- c("inName", "inPath")
+            
+            
+            n <- length(inFile$name)
+            
+            my.x <- pblapply(inFile$name, function(x) read_csv_x(x))
+            my.y <- pblapply(inFile$name, function(x) read_csv_y(x))
+            
+            
+            myfiles = pblapply(inFile$datapath, function(x) read_csv_net(x))
+            
+            myfiles.1 <- mapply(cbind, myfiles, "x" <- my.x, SIMPLIFY=F)
+            myfiles.2 <- mapply(cbind, myfiles.1, "y" <- my.y, SIMPLIFY=F)
+            
+            all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
+            
+            myfiles.list <- pblapply(myfiles.2, setNames, all.col.names)
+            
+            
+            
+            
+            myfiles.frame <- do.call(rbind, lapply(myfiles.list, data.frame, stringsAsFactors=FALSE))
+            
+            
+            
+            
+            
+            
+            data <- myfiles.frame
+            
+            
+            incProgress(1/n)
+            Sys.sleep(0.1)
+        })
+        
+        data
+        
+    })
+    
+    
+    sheetData <- reactive({
+        
+        inFile <- input$file1
+        
+        data <- read.csv(file=inFile$datapath)
+        
+        data
+        
+    })
+    
+    
+    
     observeEvent(is.null(input$file1)==FALSE, {
         
         myDataHold <- reactive({
             
-            withProgress(message = 'Processing Data', value = 0, {
-                
-                inFile <- input$file1
-                if (is.null(inFile)) return(NULL)
-                
-                #inName <- inFile$name
-                #inPath <- inFile$datapath
-                
-                #inList <- list(inName, inPath)
-                #names(inList) <- c("inName", "inPath")
-               
-                
-                n <- length(inFile$name)
-                
-                my.x <- pblapply(inFile$name, function(x) read_csv_x(x))
-                my.y <- pblapply(inFile$name, function(x) read_csv_y(x))
-
-
-                myfiles = pblapply(inFile$datapath, function(x) read_csv_net(x))
-                
-                myfiles.1 <- mapply(cbind, myfiles, "x" <- my.x, SIMPLIFY=F)
-                myfiles.2 <- mapply(cbind, myfiles.1, "y" <- my.y, SIMPLIFY=F)
-                
-                all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
-                
-                myfiles.list <- pblapply(myfiles.2, setNames, all.col.names)
-
-
-                
-                
-                myfiles.frame <- do.call(rbind, lapply(myfiles.list, data.frame, stringsAsFactors=FALSE))
-                
-
-                
-                
-                
-                
-                data <- myfiles.frame
-                
-                
-                incProgress(1/n)
-                Sys.sleep(0.1)
-            })
-            
-            data
+            if(input$filetype=="Net"){
+                netCounts()
+            } else if(input$filetype=="Sheet"){
+                sheetData()
+            }
             
         })
         
-        
+       
       
 
 
@@ -305,6 +328,8 @@ myData <- reactive({
     
 })
 
+ })
+
 
 output$downloadtable <- downloadHandler(
 filename = function() { paste(input$project, '.csv', sep='', collapse='') },
@@ -512,12 +537,11 @@ content = function(file
 
 
 plotInputSingle <- reactive({
-    input$actionprocess1
 
     
     colvals = as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
     
-   isolate(fish <- plotSinglePrep())
+   fish <- plotSinglePrep()
    
 
    
@@ -525,7 +549,7 @@ plotInputSingle <- reactive({
 
     
     
-    ggplot(fish) +
+    plot <- ggplot(fish) +
     geom_tile(aes(x, y,  fill=z, alpha=altz)) +
     #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
     scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
@@ -536,14 +560,17 @@ plotInputSingle <- reactive({
     scale_y_continuous("Y (mm)") +
     theme_classic()
     
-    
+    plot
   
     
 })
 
 
 output$simpleMap <- renderPlot({
-    plotInputSingle()
+    
+    input$actionprocess1
+
+    isolate(plotInputSingle())
 })
 
 
@@ -777,9 +804,8 @@ dataSplit3 <- reactive({
 
 
 plotInputThree <- reactive({
-    input$actionprocess3
 
-    isolate(fish.merge <- dataSplit3())
+    fish.merge <- dataSplit3()
     
     
 
@@ -797,13 +823,18 @@ plotInputThree <- reactive({
     theme_classic()
     
     
+
+    
     spectral.int.map
     
 })
 
 
 output$threeMap <- renderPlot({
-    plotInputThree()
+    
+    input$actionprocess3
+
+    isolate(plotInputThree())
 })
 
 # Float over info
@@ -1144,9 +1175,8 @@ dataSplit5 <- reactive({
 })
 
 plotInputFive <- reactive({
-    input$actionprocess5
 
-    isolate(fish.merge <- dataSplit5())
+    fish.merge <- dataSplit5()
     
     
     
@@ -1164,13 +1194,17 @@ plotInputFive <- reactive({
     theme_classic()
     
     
+    
     spectral.int.map
     
 })
 
 
 output$fiveMap <- renderPlot({
-    plotInputFive()
+    
+    input$actionprocess5
+
+    isolate(plotInputFive())
 })
 
 # Float over info
@@ -1254,6 +1288,6 @@ content = function(file) {
 
 
 
-})
+
 
 

@@ -18,6 +18,8 @@ fileInput('file1', 'Choose file to upload',
 accept = c('.csv'), multiple=TRUE
 ),
 
+radioButtons('filetype', "File Type", choices=c("Net", "Sheet"), selected="Net"),
+
 tags$hr(),
 
 fileInput('calfileinput', 'Load Cal File', accept='.quant', multiple=FALSE),
