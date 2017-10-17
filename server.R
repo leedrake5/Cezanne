@@ -44,7 +44,7 @@ shinyServer(function(input, output) {
             #inList <- list(inName, inPath)
             #names(inList) <- c("inName", "inPath")
             
-            core.n <- detectCores()-1
+            core.n <- detectCores()-2
             
             n <- length(inFile$name)
             
@@ -52,10 +52,10 @@ shinyServer(function(input, output) {
             my.y <- mclapply(inFile$name, function(x) read_csv_y(x), mc.cores=core.n)
             
             
-            myfiles = pblapply(inFile$datapath, function(x) read_csv_net(x))
+            myfiles = mclapply(inFile$datapath, function(x) read_csv_net(x), mc.cores=core.n)
             
-            myfiles.1 <- mapply(cbind, myfiles, "x" <- my.x, SIMPLIFY=F)
-            myfiles.2 <- mapply(cbind, myfiles.1, "y" <- my.y, SIMPLIFY=F)
+            myfiles.1 <- mcmapply(cbind, myfiles, "x" <- my.x, SIMPLIFY=F, mc.cores=core.n)
+            myfiles.2 <- mcmapply(cbind, myfiles.1, "y" <- my.y, SIMPLIFY=F, mc.cores=core.n)
             
             all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
             
@@ -76,9 +76,10 @@ shinyServer(function(input, output) {
             
             incProgress(1/n)
             Sys.sleep(0.1)
+            data
         })
         
-        data
+        
         
     })
     
@@ -87,9 +88,18 @@ shinyServer(function(input, output) {
         
         inFile <- input$file1
         
+        withProgress(message = 'Processing Data', value = 0, {
+
         data <- read.csv(file=inFile$datapath)
         
+        n <- length(inFile$name)
+        
+        incProgress(1/n)
+        Sys.sleep(0.1)
         data
+        })
+        
+        
         
     })
     
@@ -188,7 +198,7 @@ fullInputValCounts <- reactive({
     colnames(norm.val.frame) <- c("Spectrum", "Element", "Net")
 
     
-    val.line.table <- dcast(data=norm.val.frame, formula=Spectrum ~ Element,  fun.aggregate=mean)
+    val.line.table <- dcast(data=norm.val.frame, formula=Spectrum ~ Element,  fun.aggregate=mean, drop=FALSE)
 
     val.line.table
 })
@@ -209,10 +219,10 @@ tableInputValQuant <- reactive({
     variables <- calVariableElements()
     valdata <- myDataHold()
     
-    core.n <- detectCores()-1
+    core.n <- detectCores()-2
 
     
-    predicted.list <- pblapply(elements, function (x)
+    predicted.list <- lapply(elements, function (x)
     if(the.cal[[x]][[1]]$CalTable$CalType!=3 && the.cal[[x]][[1]]$CalTable$NormType==1){
         predict(
         object=the.cal[[x]][[2]],
@@ -287,8 +297,6 @@ tableInputValQuant <- reactive({
         )
         )
     }
-    
-    
     )
     
     predicted.vector <- unlist(predicted.list)
@@ -322,13 +330,17 @@ tableInputValQuant <- reactive({
 
 myData <- reactive({
     
-    data <- if(input$usecalfile==FALSE){
+    results <- if(input$usecalfile==FALSE){
         myDataHold()
     } else if(input$usecalfile==TRUE){
         tableInputValQuant()
     }
     
-    data[apply(data, 1, function(row) all(row !=0 )), ]
+    #results$Net <- ifelse(results$Net < 0, 0, results$Net)
+    
+    results
+    
+
     
 })
 
@@ -477,7 +489,7 @@ interpSinglePrep <- reactive({
     
     y.ratio <- y.range/x.range
     
-    fish.int <- with(fishSubset, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolution, ny=input$resolution*y.ratio))
+    fish.int <- with(fishSubset, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution, ny=input$resolution*y.ratio))
     fish.int.melt <- melt(fish.int$z, na.rm=TRUE)
     colnames(fish.int.melt) <- c("x", "y", "z")
     
@@ -669,7 +681,7 @@ interpSplit3one <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.1 <- melt(fish.int.1$z, na.rm=TRUE)
     colnames(fish.int.melt.1) <- c("x", "y", "z")
     
@@ -708,7 +720,7 @@ interpSplit3two <- reactive({
     
     
     
-    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.2 <- melt(fish.int.2$z, na.rm=TRUE)
     colnames(fish.int.melt.2) <- c("x", "y", "z")
     
@@ -745,7 +757,7 @@ interpSplit3three <- reactive({
     
     
     
-    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.3 <- melt(fish.int.3$z, na.rm=TRUE)
     colnames(fish.int.melt.3) <- c("x", "y", "z")
     
@@ -939,7 +951,7 @@ interpSplit5one <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.1 <- melt(fish.int.1$z, na.rm=TRUE)
     colnames(fish.int.melt.1) <- c("x", "y", "z")
     
@@ -980,7 +992,7 @@ fishSubset2 <- fishImport %>% filter(Line==input$fiveline2 & Element==input$five
     
     
     
-    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.2 <- melt(fish.int.2$z, na.rm=TRUE)
     colnames(fish.int.melt.2) <- c("x", "y", "z")
     
@@ -1021,7 +1033,7 @@ interpSplit5three <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.3 <- melt(fish.int.3$z, na.rm=TRUE)
     colnames(fish.int.melt.3) <- c("x", "y", "z")
     
@@ -1062,7 +1074,7 @@ interpSplit5four <- reactive({
     y.ratio <- y.range/x.range
     
 
-    fish.int.4 <- with(fishSubset4, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.4 <- with(fishSubset4, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.4 <- melt(fish.int.4$z, na.rm=TRUE)
     colnames(fish.int.melt.4) <- c("x", "y", "z")
     
@@ -1103,7 +1115,7 @@ interpSplit5five <- reactive({
     
     
 
-    fish.int.5 <- with(fishSubset5, interp(x=x, y=y, z=Net, duplicate="user", dupfun="min", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.5 <- with(fishSubset5, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.5 <- melt(fish.int.5$z, na.rm=TRUE)
     colnames(fish.int.melt.5) <- c("x", "y", "z")
     
