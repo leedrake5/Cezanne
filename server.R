@@ -200,7 +200,7 @@ fullInputValCounts <- reactive({
     
     val.line.table <- dcast(data=norm.val.frame, formula=Spectrum ~ Element,  fun.aggregate=mean, drop=FALSE)
 
-    val.line.table
+    val.line.table[complete.cases(val.line.table),]
 })
 
 
