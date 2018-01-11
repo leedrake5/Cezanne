@@ -48,23 +48,23 @@ shinyServer(function(input, output) {
             
             n <- length(inFile$name)
             
-            my.x <- mclapply(inFile$name, function(x) read_csv_x(x), mc.cores=core.n)
-            my.y <- mclapply(inFile$name, function(x) read_csv_y(x), mc.cores=core.n)
+            my.x <- mclapply(inFile$name, function(x) read_csv_x(x), mc.cores=6L)
+            my.y <- mclapply(inFile$name, function(x) read_csv_y(x), mc.cores=6L)
             
             
-            myfiles = mclapply(inFile$datapath, function(x) read_csv_net(x), mc.cores=core.n)
+            myfiles = pblapply(inFile$datapath, function(x) read_csv_net(x), cl=6L)
             
-            myfiles.1 <- mcmapply(cbind, myfiles, "x" <- my.x, SIMPLIFY=F, mc.cores=core.n)
-            myfiles.2 <- mcmapply(cbind, myfiles.1, "y" <- my.y, SIMPLIFY=F, mc.cores=core.n)
+            myfiles.1 <- mcmapply(cbind, myfiles, "x" <- my.x, SIMPLIFY=F, mc.cores=6L)
+            myfiles.2 <- mcmapply(cbind, myfiles.1, "y" <- my.y, SIMPLIFY=F, mc.cores=6L)
             
             all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
             
-            myfiles.list <- mclapply(myfiles.2, setNames, all.col.names, mc.cores=core.n)
+            myfiles.list <- pblapply(myfiles.2, setNames, all.col.names, cl=6L)
             
             
             
             
-            myfiles.frame <- do.call(rbind, mclapply(myfiles.list, data.frame, stringsAsFactors=FALSE, mc.cores=core.n))
+            myfiles.frame <- do.call(rbind, pblapply(myfiles.list, data.frame, stringsAsFactors=FALSE, cl=6L))
             
             
             
@@ -222,7 +222,7 @@ tableInputValQuant <- reactive({
     core.n <- detectCores()-2
 
     
-    predicted.list <- lapply(elements, function (x)
+    predicted.list <- pblapply(elements, function (x)
     if(the.cal[[x]][[1]]$CalTable$CalType!=3 && the.cal[[x]][[1]]$CalTable$NormType==1){
         predict(
         object=the.cal[[x]][[2]],
@@ -296,10 +296,10 @@ tableInputValQuant <- reactive({
         norm.max=the.cal[[x]][[1]][1]$CalTable$Max
         )
         )
-    }
+    }, cl=6L
     )
     
-    predicted.vector <- unlist(predicted.list)
+    predicted.vector <- as.numeric(as.vector(unlist(predicted.list)))
     
     dim(predicted.vector) <- c(length(count.table$Spectrum), length(elements))
     
@@ -499,8 +499,7 @@ interpSinglePrep <- reactive({
     fish.int.melt$altz <- transform_0_1(fish.int.melt$z)
     
     
-    fish.int.melt$z <- ifelse(fish.int.melt$z < 0, 0, fish.int.melt$z)
-    fish.int.melt <- subset(fish.int.melt, altz > input$threshhold)
+    fish.int.melt$z <- as.numeric(ifelse(fish.int.melt$z < 0, 0, fish.int.melt$z))
     
     fish.int.melt[complete.cases(fish.int.melt), ]
 
@@ -693,7 +692,8 @@ interpSplit3one <- reactive({
     fish.int.melt.1$z <- ifelse(fish.int.melt.1$z < 0, 0, fish.int.melt.1$z)
 
     fish.int.melt.1[is.na(fish.int.melt.1)] <- 0
-    
+    if(input$scale3==TRUE){fish.int.melt.1$z <- scale(fish.int.melt.1$z)}
+
     
     fish.int.melt.1
     
@@ -732,7 +732,7 @@ interpSplit3two <- reactive({
     fish.int.melt.2$z <- ifelse(fish.int.melt.2$z < 0, 0, fish.int.melt.2$z)
     
     fish.int.melt.2[is.na(fish.int.melt.2)] <- 0
-    
+    if(input$scale3==TRUE){fish.int.melt.2$z <- scale(fish.int.melt.2$z)}
     
     fish.int.melt.2
     
@@ -769,7 +769,8 @@ interpSplit3three <- reactive({
     fish.int.melt.3$z <- ifelse(fish.int.melt.3$z < 0, 0, fish.int.melt.3$z)
     
     fish.int.melt.3[is.na(fish.int.melt.3)] <- 0
-    
+    if(input$scale3==TRUE){fish.int.melt.3$z <- scale(fish.int.melt.3$z)}
+
     
      fish.int.melt.3
     
@@ -963,7 +964,8 @@ interpSplit5one <- reactive({
     fish.int.melt.1$z <- ifelse(fish.int.melt.1$z < 0, 0, fish.int.melt.1$z)
 
     fish.int.melt.1[is.na(fish.int.melt.1)] <- 0
-    
+    if(input$scale5==TRUE){fish.int.melt.1$z <- scale(fish.int.melt.1$z)}
+
     
     fish.int.melt.1
 
@@ -1006,7 +1008,8 @@ fishSubset2 <- fishImport %>% filter(Line==input$fiveline2 & Element==input$five
     fish.int.melt.2[is.na(fish.int.melt.2)] <- 0
     
     fish.int.melt.2 <- subset(fish.int.melt.2, fish.int.melt.2$altz > input$thresh5hold2)
-    
+    if(input$scale5==TRUE){fish.int.melt.2$z <- scale(fish.int.melt.2$z)}
+
     fish.int.melt.2
     
 
@@ -1045,7 +1048,8 @@ interpSplit5three <- reactive({
     fish.int.melt.3$z <- ifelse(fish.int.melt.3$z < 0, 0, fish.int.melt.3$z)
     
     fish.int.melt.3[is.na(fish.int.melt.3)] <- 0
-    
+    if(input$scale5==TRUE){fish.int.melt.3$z <- scale(fish.int.melt.3$z)}
+
     
     fish.int.melt.3
     
@@ -1086,7 +1090,8 @@ interpSplit5four <- reactive({
     fish.int.melt.4$z <- ifelse(fish.int.melt.4$z < 0, 0, fish.int.melt.4$z)
     
     fish.int.melt.4[is.na(fish.int.melt.4)] <- 0
-    
+    if(input$scale5==TRUE){fish.int.melt.4$z <- scale(fish.int.melt.4$z)}
+
     
     fish.int.melt.4
     
@@ -1127,7 +1132,8 @@ interpSplit5five <- reactive({
     fish.int.melt.5$z <- ifelse(fish.int.melt.5$z < 0, 0, fish.int.melt.5$z)
     
     fish.int.melt.5[is.na(fish.int.melt.5)] <- 0
-    
+    if(input$scale5==TRUE){fish.int.melt.5$z <- scale(fish.int.melt.5$z)}
+
     
     fish.int.melt.5
 
