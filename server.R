@@ -66,12 +66,14 @@ shinyServer(function(input, output) {
             
             myfiles.frame <- do.call(rbind, pblapply(myfiles.list, data.frame, stringsAsFactors=FALSE, cl=6L))
             
+            myfiles.frame$ElementLine <- paste0(myfiles.frame$Element, ".", myfiles.frame$Line)
+            
+            
+            data <- reshape2::dcast(myfiles.frame, x+y~ElementLine, value.var="Net", fun.aggregate=mean)
             
             
             
-            
-            
-            data <- myfiles.frame
+            data
             
             
             incProgress(1/n)
@@ -91,6 +93,9 @@ shinyServer(function(input, output) {
         withProgress(message = 'Processing Data', value = 0, {
 
         data <- read.csv(file=inFile$datapath)
+        data$ElementLine <- paste0(data$Element, ".", data$Line)
+        data <- reshape2::dcast(data, x+y~ElementLine, value.var="Net", fun.aggregate=mean)
+
         
         n <- length(inFile$name)
         
@@ -102,6 +107,8 @@ shinyServer(function(input, output) {
         
         
     })
+    
+   
     
     
     
@@ -369,7 +376,7 @@ output$testtable <- renderDataTable({
 outElements <- reactive({
     metadata.dat <- myData()
     
-    element.names <- unique(metadata.dat$Element)
+    element.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,1])
     
     element.names
     
@@ -379,8 +386,8 @@ outElements <- reactive({
 outLines <- reactive({
     metadata.dat <- myData()
     
-    line.names <- unique(metadata.dat$Line)
-    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,2])
+
     line.names
     
     
@@ -473,9 +480,9 @@ interpSinglePrep <- reactive({
     
     fishImport <- myData()
     
-    fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
-    
-    
+    #fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
+    fishSubset <- fishImport[,c("x", "y", paste0(input$elements, ".", input$lines))]
+    colnames(fishSubset)[3] <- "Net"
     
     
     ###Europe
@@ -508,8 +515,10 @@ interpSinglePrep <- reactive({
 normSinglePrep <- reactive({
     fishImport <- myData()
     
-    fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
-    
+    #fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
+    fishSubset <- fishImport[,c("x", "y", paste0(input$elements, ".", input$lines))]
+    colnames(fishSubset)[3] <- "Net"
+
     
     
     fish.norm <- data.frame(fishSubset$x, fishSubset$y, fishSubset$Net)
@@ -665,7 +674,9 @@ interpSplit3one <- reactive({
     
     fishImport <- myData()
     
-    fishSubset1 <- fishImport %>% filter(Line==input$threeline1 & Element==input$threeelement1)
+    #fishSubset1 <- fishImport %>% filter(Line==input$threeline1 & Element==input$threeelement1)
+    fishSubset1 <- fishImport[,c("x", "y", paste0(input$threeelement1, ".", input$threeline1))]
+    colnames(fishSubset1)[3] <- "Net"
 
     
     ###Europe
@@ -705,8 +716,10 @@ interpSplit3two <- reactive({
     
     fishImport <- myData()
     
-    fishSubset2 <- fishImport %>% filter(Line==input$threeline2 & Element==input$threeelement2)
-    
+    #fishSubset2 <- fishImport %>% filter(Line==input$threeline2 & Element==input$threeelement2)
+    fishSubset2 <- fishImport[,c("x", "y", paste0(input$threeelement2, ".", input$threeline2))]
+    colnames(fishSubset2)[3] <- "Net"
+
     ###Europe
     xmin <- min(fishSubset2$x)
     xmax <- max(fishSubset2$x)
@@ -742,8 +755,10 @@ interpSplit3three <- reactive({
     
     fishImport <- myData()
     
-    fishSubset3 <- fishImport %>% filter(Line==input$threeline3 & Element==input$threeelement3)
-    
+    #fishSubset3 <- fishImport %>% filter(Line==input$threeline3 & Element==input$threeelement3)
+    fishSubset3 <- fishImport[,c("x", "y", paste0(input$threeelement3, ".", input$threeline3))]
+    colnames(fishSubset3)[3] <- "Net"
+
     ###Europe
     xmin <- min(fishSubset3$x)
     xmax <- max(fishSubset3$x)
@@ -937,7 +952,9 @@ interpSplit5one <- reactive({
     
     fishImport <- myData()
     
-    fishSubset1 <- fishImport %>% filter(Line==input$fiveline1 & Element==input$fiveelement1)
+    #fishSubset1 <- fishImport %>% filter(Line==input$fiveline1 & Element==input$fiveelement1)
+    fishSubset1 <- fishImport[,c("x", "y", paste0(input$fiveelement1, ".", input$fiveline1))]
+    colnames(fishSubset1)[3] <- "Net"
 
 
     ###Europe
@@ -978,7 +995,9 @@ interpSplit5two <- reactive({
     fishImport <- myData()
     
     
-fishSubset2 <- fishImport %>% filter(Line==input$fiveline2 & Element==input$fiveelement2)
+    #fishSubset2 <- fishImport %>% filter(Line==input$fiveline2 & Element==input$fiveelement2)
+    fishSubset2 <- fishImport[,c("x", "y", paste0(input$fiveelement2, ".", input$fiveline2))]
+    colnames(fishSubset2)[3] <- "Net"
 
     
     ###Europe
@@ -1021,8 +1040,10 @@ interpSplit5three <- reactive({
     
     fishImport <- myData()
     
-    fishSubset3 <- fishImport %>% filter(Line==input$fiveline3 & Element==input$fiveelement3)
-    
+    #fishSubset3 <- fishImport %>% filter(Line==input$fiveline3 & Element==input$fiveelement3)
+    fishSubset3 <- fishImport[,c("x", "y", paste0(input$fiveelement3, ".", input$fiveline3))]
+    colnames(fishSubset3)[3] <- "Net"
+
     
     ###Europe
     xmin <- min(fishSubset3$x)
@@ -1063,8 +1084,10 @@ interpSplit5four <- reactive({
     
     fishImport <- myData()
     
-    fishSubset4 <- fishImport %>% filter(Line==input$fiveline4 & Element==input$fiveelement4)
-    
+    #fishSubset4 <- fishImport %>% filter(Line==input$fiveline4 & Element==input$fiveelement4)
+    fishSubset4 <- fishImport[,c("x", "y", paste0(input$fiveelement4, ".", input$fiveline4))]
+    colnames(fishSubset4)[3] <- "Net"
+
     
     ###Europe
     xmin <- min(fishSubset4$x)
@@ -1104,8 +1127,10 @@ interpSplit5five <- reactive({
     fishImport <- myData()
     
    
-    fishSubset5 <- fishImport %>% filter(Line==input$fiveline5 & Element==input$fiveelement5)
-    
+   #fishSubset5 <- fishImport %>% filter(Line==input$fiveline5 & Element==input$fiveelement5)
+    fishSubset5 <- fishImport[,c("x", "y", paste0(input$fiveelement5, ".", input$fiveline5))]
+    colnames(fishSubset5)[3] <- "Net"
+
     
     ###Europe
     xmin <- min(fishSubset5$x)
