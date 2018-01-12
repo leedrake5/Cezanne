@@ -12,6 +12,7 @@ library(R.utils)
 library(R.oo)
 library(plyr)
 library(dplyr)
+library(openxlsx)
 
 library(ggplot2)
 library(reshape2)
@@ -108,6 +109,28 @@ shinyServer(function(input, output) {
         
     })
     
+    ExcelData <- reactive({
+        
+        inFile <- input$file1
+        
+        #if (is.null(inFile)) {return(NULL)}
+        
+        
+        
+        proto.fish <- loadWorkbook(file=inFile$datapath)
+        just.fish <- readWorkbook(proto.fish, sheet=2)
+        new.fish <- just.fish[,-1]
+        new.fish$x <- sapply(just.fish[,1], read_csv_x)
+        new.fish$y <- sapply(just.fish[,1], read_csv_y)
+        
+        final.fish <- new.fish[,c("x", "y", names(just.fish[,-1]))]
+        
+        final.fish
+
+
+        
+    })
+    
    
     
     
@@ -120,6 +143,8 @@ shinyServer(function(input, output) {
                 netCounts()
             } else if(input$filetype=="Sheet"){
                 sheetData()
+            } else if(input$filetype=="Excel"){
+                ExcelData()
             }
             
         })
@@ -335,7 +360,7 @@ tableInputValQuant <- reactive({
     
 })
 
-myData <- reactive({
+dataHold <- reactive({
     
     results <- if(input$usecalfile==FALSE){
         myDataHold()
@@ -343,11 +368,7 @@ myData <- reactive({
         tableInputValQuant()
     }
     
-    #results$Net <- ifelse(results$Net < 0, 0, results$Net)
-    
     results
-    
-
     
 })
 
@@ -374,7 +395,7 @@ output$testtable <- renderDataTable({
 
 
 outElements <- reactive({
-    metadata.dat <- myData()
+    metadata.dat <- dataHold()
     
     element.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,1])
     
@@ -384,7 +405,7 @@ outElements <- reactive({
 })
 
 outLines <- reactive({
-    metadata.dat <- myData()
+    metadata.dat <- dataHold()
     
     line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,2])
 
@@ -476,6 +497,37 @@ output$in5Line5 <- renderUI({
 ranges1 <- reactiveValues(x = NULL, y = NULL)
 
 
+
+myData <- reactive({
+    
+    results <- dataHold()
+    
+    y.unique <- unique(results$y)
+    y.choose <- y.unique[seq(1, length(y.unique), 2)]
+    y.check <- sapply(results$y, function(x) match(x, y.choose))
+    y.is <- y.check==1
+    y.is[is.na(y.is)] <- TRUE
+    
+    results$maintain <- y.is
+    
+    keep.frame <- subset(results, maintain==TRUE)
+    alter.frame <- subset(results, maintain==FALSE)
+    
+    alter.frame$x <- alter.frame$x+input$adjust
+    
+    results.prelim <- rbind(keep.frame, alter.frame)
+    
+    results.final <- results.prelim[,1:length(results.prelim)-1]
+    
+    #results$Net <- ifelse(results$Net < 0, 0, results$Net)
+    
+    results.final
+    
+    
+    
+})
+
+
 interpSinglePrep <- reactive({
     
     fishImport <- myData()
@@ -560,33 +612,71 @@ content = function(file
 )
 
 
-
+singlePlotType <- reactive({
+    
+    if(input$colorramp=="Terrain"){
+        "ColorRamp"
+    } else if(input$colorramp=="Rainbow"){
+        "ColorRamp"
+    } else if(input$colorramp=="Heat"){
+        "ColorRamp"
+    } else if(input$colorramp=="Topo"){
+        "ColorRamp"
+    } else if(input$colorramp=="CM"){
+        "ColorRamp"
+    } else if (input$colorramp=="Black and White"){
+        "BW"
+    }
+    
+    
+})
 
 plotInputSingle <- reactive({
 
     
-    colvals = as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
+    colvals <- if(singlePlotType()=="ColorRamp"){
+        as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
+    } else {
+        as.character(paste("terrain.colors(", input$colorrampvalues, ")", sep="", collapse=""))
+    }
     
-   fish <- plotSinglePrep()
+    fish <- if(input$useinterp==TRUE){
+        plotSinglePrep()
+    } else if(input$useinterp==FALSE){
+        normSinglePrep()
+    }
+   
+   colorramp.plot <- ggplot(fish) +
+   geom_tile(aes(x, y,  fill=z, alpha=altz)) +
+   #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+   scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
+   scale_alpha_continuous("Net Counts", range=c(0, 1)) +
+   coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
+   guides(alpha=FALSE) +
+   scale_x_continuous("X (mm)") +
+   scale_y_continuous("Y (mm)") +
+   theme_classic()
+   
+   bw.plot <- ggplot(fish) +
+   geom_tile(aes(x, y,  fill=z, alpha=altz)) +
+   #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+   scale_fill_gradient2("Net Counts", low="white", high="black", na.value = "white") +
+   scale_alpha_continuous("Net Counts", range=c(0, 1)) +
+   coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
+   guides(alpha=FALSE) +
+   scale_x_continuous("X (mm)") +
+   scale_y_continuous("Y (mm)") +
+   theme_classic()
    
 
-   
-   
-
     
     
-    plot <- ggplot(fish) +
-    geom_tile(aes(x, y,  fill=z, alpha=altz)) +
-    #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-    scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
-    scale_alpha_continuous("Net Counts", range=c(0, 1)) +
-    coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
-    guides(alpha=FALSE) +
-    scale_x_continuous("X (mm)") +
-    scale_y_continuous("Y (mm)") +
-    theme_classic()
     
-    plot
+    if(singlePlotType()=="ColorRamp"){
+        colorramp.plot
+    } else  if(singlePlotType()=="BW"){
+        bw.plot
+    }
   
     
 })

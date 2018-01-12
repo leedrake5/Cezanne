@@ -18,8 +18,8 @@ fileInput('file1', 'Choose file to upload',
 accept = c('.csv'), multiple=TRUE
 ),
 
-radioButtons('filetype', "File Type", choices=c("Net", "Sheet"), selected="Net"),
-
+radioButtons('filetype', "File Type", choices=c("Excel", "Net", "Sheet"), selected="Excel"),
+numericInput('adjust', "Adjust",  value=0),
 
 tags$hr(),
 
@@ -42,9 +42,9 @@ tags$hr(),
 
 selectInput(
 "colorramp", "Color Ramp",
-c("Terrain" = "terrain.colors(", "Rainbow" = "rainbow(", "Heat" = "heat.colors(", "Topo" = "topo.colors(", "CM" = "cm.colors("),
+c("Black and White" = "Black and White", "Terrain" = "terrain.colors(", "Rainbow" = "rainbow(", "Heat" = "heat.colors(", "Topo" = "topo.colors(", "CM" = "cm.colors("),
 
-selected="Terrain"),
+selected="Black and White"),
 
 sliderInput("colorrampvalues", label = "Steps", value=15, min=2, max=30),
 
