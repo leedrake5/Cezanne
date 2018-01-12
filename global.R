@@ -1,4 +1,4 @@
-list.of.packages <- c("pbapply","parallel", "reshape2", "TTR", "dplyr", "ggtern", "ggplot2", "shiny", "rhandsontable", "random", "data.table", "DT", "shinythemes", "Cairo", "broom", "shinyjs", "gridExtra", "dtplyr", "formattable", "colourpicker", "R.utils", "R.oo", "pvclust", "openxlsx")
+list.of.packages <- c("pbapply","parallel", "reshape2", "TTR", "dplyr", "ggtern", "ggplot2", "shiny", "rhandsontable", "random", "data.table", "DT", "shinythemes", "Cairo", "broom", "shinyjs", "gridExtra", "dtplyr", "formattable", "colourpicker", "R.utils", "R.oo", "pvclust", "openxlsx", "akima")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
