@@ -77,6 +77,72 @@ uiOutput("hover_infosimp")))
 ))
 ),
 
+
+
+
+tabPanel("PCA",
+div(class="outer",
+
+
+fluidRow(
+sidebarLayout(
+
+sidebarPanel(
+numericInput("knum", label = "K-Means", value=3),
+
+uiOutput('defaultlines'),
+
+
+uiOutput('pcaFocusVariable'),
+uiOutput('pcaFocusUI'),
+uiOutput('pcaFocusLabel'),
+
+
+sliderInput("spotsize", label = "Point Size", value=5, min=2, max=15),
+
+checkboxInput('elipseplot1', "Elipse"),
+checkboxInput('logtrans', "Log Transform"),
+
+
+uiOutput('inxlimrangepca'),
+uiOutput('inylimrangepca'),
+
+
+tags$hr(),
+
+
+downloadButton('downloadPlot2', "Plot"),
+downloadButton('xrfpcatablefulldownload', "Results")
+
+),
+
+
+
+mainPanel(
+tabsetPanel(
+id = 'dataset',
+tabPanel('PCA Plot',
+
+# this is an extra div used ONLY to create positioned ancestor for tooltip
+# we don't change its position
+div(
+style = "position:relative",
+plotOutput("xrfpcaplot", height = 650,
+hover = hoverOpts("plot_hoverpca", delay = 100, delayType = "debounce")),
+uiOutput("hover_infopca")
+)
+
+
+),
+tabPanel("Table", DT::dataTableOutput('xrfpcatable'))
+
+
+))
+
+))
+
+)),
+
 tabPanel("Three Element Map",
 titlePanel("Three Element Plot"),
 

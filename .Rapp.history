@@ -1,2864 +1,389 @@
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1]/1000)#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")
-source.area.frame
-sanjuan.poly.list <- lapply(p1, function(x) SpatialPolygons(x, proj4string = CRS("+proj=longlat +datum=WGS84")))
-sanjuan.poly.list <- lapply(list(p1), function(x) SpatialPolygons(x, proj4string = CRS("+proj=longlat +datum=WGS84")))
-sanjuan.poly.list <- lapply(p1, function(x) SpatialPolygons(x, proj4string = CRS("+proj=longlat +datum=WGS84")))
-ls(sanjuan_spatial_polys)
-str(sanjuan_spatial_polys)
-str(sanjuan_spatial_polys@polygons$Chuska)
-str(sanjuan_spatial_polys@polygons[[1]])
-str(sanjuan_spatial_polys@polygons[[1]]$Chuska)
-str(sanjuan_spatial_polys@polygons[[1]][[1]])
-str(sanjuan_spatial_polys@polygons[[1]]source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1]/1000000)#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2"))
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
+length(channels[1])
+noquote(channels)
+noquote(channels)[1]
+channels.pre <- xmllist[["ClassInstance"]][["Channels"]][[1]]
+channels <- strsplit(channels.pre, ",", )
+length(channels)
+channels
+channels <- strsplit(channels.pre, ",", )[[1]]
+length(channels)
+channels <- as.numeric(strsplit(channels.pre, ",", )[[1]])
+channels
+length(channels)
+str(xmllist)
+newdata <- as.data.frame(seq(1, 4096, 1))
+head(newdata)
+ls(xmllist[["RTHeader"]])
+xmllist[["RTHeader"]]
+ls(xmllist[[1]])
+xmllist[[1]]
+xmllist[[2]]
+ls(xmllist[["ClassInstance"]])
+xmllist[["ClassInstance"]][["TRTHeaderedClass"]][["ClassInstance"]][["LifeTime"]]
+ls(xmllist[["ClassInstance"]][["TRTHeaderedClass"]])
+ls(xmllist[["ClassInstance"]][["TRTHeaderedClass"]][["ClassInstance"]])
+ls(xmllist[["ClassInstance"]][["TRTHeaderedClass"]][["ClassInstance"]][["TRTKnownHeader"]])
+head(xmllist[["ClassInstance"]][["ClassInstance"]])
+xmllist[["ClassInstance"]][["ClassInstance"]][["CalibAbs"]]
+as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibAbs"]])
+slope <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibLin"]])
+slope
+xmllist[["ClassInstance"]][["TRTHeaderedClass"]][["ClassInstance"]][["LifeTime"]]
+xmllist[["TRTHeaderedClass"]][["ClassInstance"]][["LifeTime"]]
+ls(xmllist[["TRTHeaderedClass"]])
+ls(xmllist)
+time <- xmllist[["RTHeaderedClass"]][["ClassInstance"]][["LifeTime"]]
+time
+ls(xmllist[["RTHeaderedClass"]])
+ls(xmllist[["RTHeader"]])
+xmllist[[2]]
+time <- xmllist[[2]][["TRTHeaderedClass"]][["ClassInstance"]][["LifeTime"]]
+time
+xmllist[[2]][["TRTHeaderedClass"]]
+xmllist[[2]][["TRTHeaderedClass"]][["ClassInstance"]]
+xmllist[[2]][["TRTHeaderedClass"]][["ClassInstance"]][["RtGenerator"]]
+xmllist[[2]][["TRTHeaderedClass"]][["ClassInstance"]][["RTGenerator"]]
+xmllist[[2]][["TRTHeaderedClass"]][["ClassInstance"]][["ClassInstance"]]
+xmllist[[2]][["TRTHeaderedClass"]][["ClassInstance"]]
+xmllist[[2]][["TRTHeaderedClass"]][[1]]
+xmllist[[2]][["TRTHeaderedClass"]][[2]]
+xmllist[[2]][["TRTHeaderedClass"]][[3]]
+time <- as.numeric(xmllist[[2]][["TRTHeaderedClass"]][[3]][["LifeTime"]])/1000
+time
+newdata[1]
+energy <- newdata[,1]
+energy
+energy <- newdata[,1]*slope+intercept
+intercept <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibAbs"]])
+slope <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibLin"]])
+energy <- newdata[,1]*slope+intercept
+energy
+readSPX <- function(xmlfile){#
+    filename <- gsub(".spx", "", basename(xmlfile))#
+    filename.vector <- rep(filename, 4096)#
+    xmlfile <- xmlTreeParse("/Users/lee/Desktop/XG Labs/standards/SPX/932E_7point3_spectrum.spx")#
+    xmllist <- xmlToList(xmlfile)#
+    channels.pre <- xmllist[["ClassInstance"]][["Channels"]][[1]]#
+    counts <- as.numeric(strsplit(channels.pre, ",", )[[1]])#
+    newdata <- as.data.frame(seq(1, 4096, 1))#
+    intercept <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibAbs"]])#
+    slope <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibLin"]])#
+    time <- as.numeric(xmllist[[2]][["TRTHeaderedClass"]][[3]][["LifeTime"]])/1000#
+    cps <- counts/time#
+    energy <- newdata[,1]*slope+intercept#
+    spectra.frame <- data.frame(energy, cps, filename.vector)#
+    colnames(spectra.frame) <- c("Energy", "CPS", "Spectrum")#
+    return(spectra.frame)#
 #
-#sanjuan.poly.list <- lapply(p1, function(x) SpatialPolygons(x, proj4string = CRS("+proj=longlat +datum=WGS84")))#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=m +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1]/1000000)#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")
-source.area.frame
-72548.077180/194168.8
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-#sanjuan.poly.list <- lapply(p1, function(x) SpatialPolygons(x, proj4string = CRS("+proj=longlat +datum=WGS84")))#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")
-source.area.frame
-72548.077180/194168.8
-#####Area Estimates#
-areadef <- 0.7#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame
-write.table(source.area.frame, "~/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.5#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.8#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.6#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.4#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.9#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame,  ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.85#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.8#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame, dur_poly_frame, ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador", "SanJuan", "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-head(poly.list[[1]])
-head(poly.list[[2]])
-head(poly.list[[3]])
-head(poly.list[[4]])
-head(poly.list[[5]])
-head(poly.list[[6]])
-head(poly.list[[7]])
-head(poly.list[[8]])
-#####Area Estimates#
-areadef <- 0.8#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame,  ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.75#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame,  ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.7#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame,  ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-#####Area Estimates#
-areadef <- 0.5#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")#
-#
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")#
-####North Jemez#
-results.mea <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MEA)#
-colnames(results.mea) <- c("Long", "Lat", "MEA")#
-#
-results.int.mea <- with(results.mea, interp(x=Long, y=Lat, z=MEA, duplicate="mean", nx=300, ny=300))#
-results.int.mea.melt <- melt(results.int.mea$z, na.rm=TRUE)#
-colnames(results.int.mea.melt) <- c("x", "y", "z")#
-#
-results.int.mea.melt$x <- results.int.mea$x[results.int.mea.melt$x]#
-results.int.mea.melt$y <- results.int.mea$y[results.int.mea.melt$y]#
-#
-results.int.mea.melt[is.na(results.int.mea.melt)] <- 0#
-#
-results.int.mea.melt <- subset(results.int.mea.melt, z > areadef)#
-mea_poly_frame <- results.int.mea.melt#
-colnames(mea_poly_frame) <- c("lon", "lat", "z")#
-####South Jemez#
-results.jem <- data.frame(results.sig$Long, results.sig$Lat, results.sig$JEM)#
-colnames(results.jem) <- c("Long", "Lat", "JEM")#
-#
-results.int.jem <- with(results.jem, interp(x=Long, y=Lat, z=JEM, duplicate="mean", nx=300, ny=300))#
-results.int.jem.melt <- melt(results.int.jem$z, na.rm=TRUE)#
-colnames(results.int.jem.melt) <- c("x", "y", "z")#
-#
-results.int.jem.melt$x <- results.int.jem$x[results.int.jem.melt$x]#
-results.int.jem.melt$y <- results.int.jem$y[results.int.jem.melt$y]#
-#
-results.int.jem.melt[is.na(results.int.jem.melt)] <- 0#
-#
-results.int.jem.melt <- subset(results.int.jem.melt, z > areadef)#
-jem_poly_frame <- results.int.jem.melt#
-colnames(jem_poly_frame) <- c("lon", "lat", "z")#
-####Gobernador#
-results.gob <- data.frame(results.sig$Long, results.sig$Lat, results.sig$GOB)#
-colnames(results.gob) <- c("Long", "Lat", "GOB")#
-#
-results.int.gob <- with(results.gob, interp(x=Long, y=Lat, z=GOB, duplicate="mean", nx=300, ny=300))#
-results.int.gob.melt <- melt(results.int.gob$z, na.rm=TRUE)#
-colnames(results.int.gob.melt) <- c("x", "y", "z")#
-#
-results.int.gob.melt$x <- results.int.gob$x[results.int.gob.melt$x]#
-results.int.gob.melt$y <- results.int.gob$y[results.int.gob.melt$y]#
-#
-results.int.gob.melt[is.na(results.int.gob.melt)] <- 0#
-#
-results.int.gob.melt <- subset(results.int.gob.melt, z > areadef)#
-gob_poly_frame <- results.int.gob.melt#
-colnames(gob_poly_frame) <- c("lon", "lat", "z")#
-####San Juan Mountains#
-results.dur <- data.frame(results.sig$Long, results.sig$Lat, results.sig$DUR)#
-colnames(results.dur) <- c("Long", "Lat", "DUR")#
-#
-results.int.dur <- with(results.dur, interp(x=Long, y=Lat, z=DUR, duplicate="mean", nx=300, ny=300))#
-results.int.dur.melt <- melt(results.int.dur$z, na.rm=TRUE)#
-colnames(results.int.dur.melt) <- c("x", "y", "z")#
-#
-results.int.dur.melt$x <- results.int.dur$x[results.int.dur.melt$x]#
-results.int.dur.melt$y <- results.int.dur$y[results.int.dur.melt$y]#
-#
-results.int.dur.melt[is.na(results.int.dur.melt)] <- 0#
-#
-results.int.dur.melt <- subset(results.int.dur.melt, z > areadef)#
-dur_poly_frame <- results.int.dur.melt#
-colnames(dur_poly_frame) <- c("lon", "lat", "z")#
-####Mount Taylor#
-results.ceb <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CEB)#
-colnames(results.ceb) <- c("Long", "Lat", "CEB")#
-#
-results.int.ceb <- with(results.ceb, interp(x=Long, y=Lat, z=CEB, duplicate="mean", nx=300, ny=300))#
-results.int.ceb.melt <- melt(results.int.ceb$z, na.rm=TRUE)#
-colnames(results.int.ceb.melt) <- c("x", "y", "z")#
-#
-results.int.ceb.melt$x <- results.int.ceb$x[results.int.ceb.melt$x]#
-results.int.ceb.melt$y <- results.int.ceb$y[results.int.ceb.melt$y]#
-#
-results.int.ceb.melt[is.na(results.int.ceb.melt)] <- 0#
-#
-results.int.ceb.melt <- subset(results.int.ceb.melt, z > areadef)#
-ceb_poly_frame <- results.int.ceb.melt#
-colnames(ceb_poly_frame) <- c("lon", "lat", "z")#
-####No Source#
-results.none <- data.frame(results.sig$Long, results.sig$Lat, results.sig$None)#
-colnames(results.none) <- c("Long", "Lat", "None")#
-#
-results.int.none <- with(results.none, interp(x=Long, y=Lat, z=None, duplicate="mean", nx=300, ny=300))#
-results.int.none.melt <- melt(results.int.none$z, na.rm=TRUE)#
-colnames(results.int.none.melt) <- c("x", "y", "z")#
-#
-results.int.none.melt$x <- results.int.none$x[results.int.none.melt$x]#
-results.int.none.melt$y <- results.int.none$y[results.int.none.melt$y]#
-#
-results.int.none.melt[is.na(results.int.none.melt)] <- 0#
-#
-results.int.none.melt <- subset(results.int.none.melt, z > areadef)#
-none_poly_frame <- results.int.none.melt#
-colnames(none_poly_frame) <- c("lon", "lat", "z")#
-#
-poly.list <- list(chu_poly_frame, cib_poly_frame, mver_poly_frame, mea_poly_frame, jem_poly_frame, gob_poly_frame,  ceb_poly_frame, none_poly_frame)#
-names(poly.list) <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-#
-poly.list <- lapply(poly.list, function(x) { x["z"] <- NULL; x })#
-#
-ps <- sapply(poly.list, Polygon)#
-#
-p1 <- Polygons(ps, ID = 1)#
-#
-sanjuan_spatial_polys <- SpatialPolygons(list(p1), proj4string = CRS("+proj=longlat +datum=WGS84") )#
-#
-res <- spTransform(sanjuan_spatial_polys, CRS("+proj=utm +zone=13 +ellps=WGS84 +datum=WGS84 +units=km +no_defs +towgs84=0,0,0"))#
-#
-areaslatlong <- sapply(slot(sanjuan_spatial_polys, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-areasutm <- sapply(slot(res, "polygons"), function(x) sapply(slot(x, "Polygons"), slot, "area"))#
-source.names <- c("Chuska", "Zuni", "MesaVerde", "NorthJemez", "SouthJemez", "Gobernador",  "MountTaylor", "None")#
-source.area.frame <- data.frame(source.names, areaslatlong[,1], areasutm[,1])#
-colnames(source.area.frame) <- c("SourceSequence", "LatLong", "Km2")#
-source.area.frame#
-write.table(source.area.frame, "/Users/lee/Dropbox/Documents/Chaco/Tree Rings/Results/sourceareas.csv", sep=",")
-head(results.int.chu.melt)
-length(results.int.chu.melt$x)
-#####Area Estimates#
-areadef <- 0.9#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")
-length(results.int.chu.melt$x)
-#####Area Estimates#
-areadef <- 0.5#
-####Chuska Mountains#
-results.chu <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CHU)#
-colnames(results.chu) <- c("Long", "Lat", "CHU")#
-#
-results.int.chu <- with(results.chu, interp(x=Long, y=Lat, z=CHU, duplicate="mean", nx=300, ny=300))#
-results.int.chu.melt <- reshape2::melt(results.int.chu$z, na.rm=TRUE)#
-colnames(results.int.chu.melt) <- c("x", "y", "z")#
-#
-results.int.chu.melt$x <- results.int.chu$x[results.int.chu.melt$x]#
-results.int.chu.melt$y <- results.int.chu$y[results.int.chu.melt$y]#
-#
-results.int.chu.melt[is.na(results.int.chu.melt)] <- 0#
-#
-results.int.chu.melt <- subset(results.int.chu.melt, z > areadef)#
-chu_poly_frame <- results.int.chu.melt#
-colnames(chu_poly_frame) <- c("lon", "lat", "z")#
-####Zuni Mountains#
-results.cib <- data.frame(results.sig$Long, results.sig$Lat, results.sig$CIB)#
-colnames(results.cib) <- c("Long", "Lat", "CIB")#
-#
-results.int.cib <- with(results.cib, interp(x=Long, y=Lat, z=CIB, duplicate="mean", nx=300, ny=300))#
-results.int.cib.melt <- melt(results.int.cib$z, na.rm=TRUE)#
-colnames(results.int.cib.melt) <- c("x", "y", "z")#
-#
-results.int.cib.melt$x <- results.int.cib$x[results.int.cib.melt$x]#
-results.int.cib.melt$y <- results.int.cib$y[results.int.cib.melt$y]#
-#
-results.int.cib.melt[is.na(results.int.cib.melt)] <- 0#
-results.int.cib.melt <- subset(results.int.cib.melt, z > areadef)#
-cib_poly_frame <- results.int.cib.melt#
-colnames(cib_poly_frame) <- c("lon", "lat", "z")
-length(results.int.cib.melt$x)
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")
-length(results.int.mver.melt$x)
-areadef <- 0.5
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")
-length(results.int.mver.melt$x)
-areadef <- 0.8
-####Mesa Verde#
-results.mver <- data.frame(results.sig$Long, results.sig$Lat, results.sig$MVER)#
-colnames(results.mver) <- c("Long", "Lat", "MVER")#
-#
-results.int.mver <- with(results.mver, interp(x=Long, y=Lat, z=MVER, duplicate="mean", nx=300, ny=300))#
-results.int.mver.melt <- melt(results.int.mver$z, na.rm=TRUE)#
-colnames(results.int.mver.melt) <- c("x", "y", "z")#
-#
-results.int.mver.melt$x <- results.int.mver$x[results.int.mver.melt$x]#
-results.int.mver.melt$y <- results.int.mver$y[results.int.mver.melt$y]#
-#
-results.int.mver.melt[is.na(results.int.mver.melt)] <- 0#
-#
-results.int.mver.melt <- subset(results.int.mver.melt, z > areadef)#
-mver_poly_frame <- results.int.mver.melt#
-colnames(mver_poly_frame) <- c("lon", "lat", "z")
-length(results.int.mver.melt$x)
-library(bcp)#
-library(ggplot2)#
-#
-trump.all <- read.table(file="~/Downloads/00c -Pres-45-Trump - Job Approval - National-poll-responses-clean.tsv", header=TRUE, sep="\t")#
-#
-trump <- as.data.frame(subset(trump.all, sample_subpopulation==c("Adults", "Likely Voters", "Registered Voters")))#
-#
-trump$Date <- as.Date(trump$end_date, format="%Y-%m-%d")#
-#
-trump.approve.bc <- bcp(y=trump$Approve, id=trump$Date, burnin=2000, mcmc=10000)#
-#
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")
-head(trump)
-plot(trump.approve.bc)
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-###Create Plots#
-approve.mean.plot <- ggplot(trump.approve.bayes.dataframe, aes(as.Date(Date, format="%Y-%m-%d"), Approve)) +#
-geom_point(alpha=0.5) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Approval")#
-#
-approve.prob.plot <- qplot(as.Date(Date, format="%Y-%m-%d"), PosteriorProb, data=trump.approve.bayes.dataframe, geom="line", ylab = "Probability") +#
-theme_bw() +#
-scale_x_date("Date") +#
-scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.333))
-approve.mean.plot
-trump.approve.bc <- bcp(y=trump$Approve, id=trump$Date, burnin=2000, mcmc=100000)
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-###Create Plots#
-approve.mean.plot <- ggplot(trump.approve.bayes.dataframe, aes(as.Date(Date, format="%Y-%m-%d"), Approve)) +#
-geom_point(alpha=0.5) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Approval")#
-#
-approve.prob.plot <- qplot(as.Date(Date, format="%Y-%m-%d"), PosteriorProb, data=trump.approve.bayes.dataframe, geom="line", ylab = "Probability") +#
-theme_bw() +#
-scale_x_date("Date") +#
-scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.333))
-approve.mean.plot
-trump.all <- read.table(file="~/Downloads/00c -Pres-45-Trump - Job Approval - National-poll-responses-clean.tsv", header=TRUE, sep="\t")#
-#
-trump <- as.data.frame(subset(trump.all, trump.all$sample_subpopulation==c("Adults", "Likely Voters", "Registered Voters")))#
-#
-trump$Date <- as.Date(trump$end_date, format="%Y-%m-%d")#
-#
-trump.approve.bc <- bcp(y=trump$Approve, id=trump$Date, burnin=2000, mcmc=100000)#
-#
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-###Create Plots#
-approve.mean.plot <- ggplot(trump.approve.bayes.dataframe, aes(as.Date(Date, format="%Y-%m-%d"), Approve)) +#
-geom_point(alpha=0.5) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Approval")#
-#
-approve.prob.plot <- qplot(as.Date(Date, format="%Y-%m-%d"), PosteriorProb, data=trump.approve.bayes.dataframe, geom="line", ylab = "Probability") +#
-theme_bw() +#
-scale_x_date("Date") +#
-scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.333))
-approve.mean.plot
-trump.disapprove.bc <- bcp(y=trump$Disapprove, id=trump$Date, burnin=2000, mcmc=10000)#
-trump.disapprove.posterior.mean <- trump.disapprove.bc$posterior.mean#
-trump.disapprove.posterior.prob <- trump.disapprove.bc$posterior.prob#
-trump.disapprove.posterior.var <- trump.disapprove.bc$posterior.var#
-trump.disapprove.posterior.sd <- sqrt(trump.disapprove.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Disapprove, trump.disapprove.posterior.mean, trump.disapprove.posterior.prob, trump.disapprove.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Disapprove", "PosteriorMean", "PosteriorProb", "PosteriorSD")
-trump.disapprove.bc <- bcp(y=trump$Disapprove, id=trump$Date, burnin=2000, mcmc=10000)#
-trump.disapprove.posterior.mean <- trump.disapprove.bc$posterior.mean#
-trump.disapprove.posterior.prob <- trump.disapprove.bc$posterior.prob#
-trump.disapprove.posterior.var <- trump.disapprove.bc$posterior.var#
-trump.disapprove.posterior.sd <- sqrt(trump.disapprove.posterior.var)#
-#
-trump.disapprove.bayes.dataframe <- data.frame(trump$Date, trump$Disapprove, trump.disapprove.posterior.mean, trump.disapprove.posterior.prob, trump.disapprove.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Disapprove", "PosteriorMean", "PosteriorProb", "PosteriorSD")
-range(trump.disapprove.posterior.mean)
-range(trump.approve.posterior.mean)
-range(trump.disapprove.bc$posterior.mean)
-ls(trump.disapprove.bc)
-range(trump.disapprove.bc$mcmc.means)
-trump.approve.bc <- bcp(y=trump$Approve, id=trump$Date, burnin=2000, mcmc=100000, return.mcmc=TRUE)
-range(trump.approve.bc$posterior.mean)
-trump.approve.bc <- bcp(y=trump$Approve/100, id=trump$Date, burnin=2000, mcmc=100000, return.mcmc=TRUE)
-range(trump.approve.bc$posterior.mean)
-set.random.seed(90)#
-trump.approve.bc <- bcp(y=trump$Approve, id=trump$Date, burnin=2000, mcmc=100000, return.mcmc=TRUE)
-set.seed(90)#
-trump.approve.bc <- bcp(y=trump$Approve, id=trump$Date, burnin=2000, mcmc=100000, return.mcmc=TRUE)
-range(trump.approve.bc$posterior.mean)
-trump.approve.bc <- bcp(y=trump$Approve, burnin=2000, mcmc=10000, return.mcmc=TRUE)
-range(trump.approve.bc$posterior.mean)
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-###Create Plots#
-approve.mean.plot <- ggplot(trump.approve.bayes.dataframe, aes(as.Date(Date, format="%Y-%m-%d"), Approve)) +#
-geom_point(alpha=0.5) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Approval")#
-#
-approve.prob.plot <- qplot(as.Date(Date, format="%Y-%m-%d"), PosteriorProb, data=trump.approve.bayes.dataframe, geom="line", ylab = "Probability") +#
-theme_bw() +#
-scale_x_date("Date") +#
-scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.333))
-approve.mean.plot
-approve.prob.plot
-###Create Plots#
-approve.mean.plot <- ggplot(trump.approve.bayes.dataframe, aes(as.Date(Date, format="%Y-%m-%d"), Approve)) +#
-geom_point(alpha=0.5) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean), colour="blue") +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Approval")
-approve.mean.plot
-trump.all <- read.table(file="~/Downloads/00c -Pres-45-Trump - Job Approval - National-poll-responses-clean.tsv", header=TRUE, sep="\t")#
-#
-trump <- as.data.frame(subset(trump.all, trump.all$sample_subpopulation==c("Adults", "Likely Voters", "Registered Voters")))#
-#
-trump$Date <- as.Date(trump$end_date, format="%Y-%m-%d")#
-set.seed(90)#
-trump.approve.bc <- bcp(y=trump$Approve, burnin=20000, mcmc=1000000, return.mcmc=TRUE)#
-#
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-#
-trump.disapprove.bc <- bcp(y=trump$Disapprove,  burnin=20000, mcmc=1000000)#
-trump.disapprove.posterior.mean <- trump.disapprove.bc$posterior.mean#
-trump.disapprove.posterior.prob <- trump.disapprove.bc$posterior.prob#
-trump.disapprove.posterior.var <- trump.disapprove.bc$posterior.var#
-trump.disapprove.posterior.sd <- sqrt(trump.disapprove.posterior.var)#
-#
-trump.disapprove.bayes.dataframe <- data.frame(trump$Date, trump$Disapprove, trump.disapprove.posterior.mean, trump.disapprove.posterior.prob, trump.disapprove.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Disapprove", "PosteriorMean", "PosteriorProb", "PosteriorSD")
-trump.total.frame <- data.frame(trump$Date, c(trump$Approve, trump$Disapprove), c(trump.approve.posterior.mean, trump.disapprove.posterior.mean), c(trump.approve.posterior.prob, trump.disapprove.posterior.prob), c(trump.approve.posterior.sd, trump.disapprove.posterior.sd), c(rep("Approval", length(trump$Approve)),rep("Disapproval", length(trump$Disapprove))))#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd")
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type")
-trump.total.frame <- data.frame(trump$Date, c(trump$Approve, trump$Disapprove), c(trump.approve.posterior.mean, trump.disapprove.posterior.mean), c(trump.approve.posterior.prob, trump.disapprove.posterior.prob), c(trump.approve.posterior.sd, trump.disapprove.posterior.sd), c(rep("Approval", length(trump$Approve)),rep("Disapproval", length(trump$Disapprove))))
-head(trump.total.frame)
-trump.total.frame <- data.frame(trump$Date,#
-c(trump$Approve, trump$Disapprove),#
-c(trump.approve.posterior.mean, trump.disapprove.posterior.mean),#
-c(trump.approve.posterior.prob, trump.disapprove.posterior.prob),#
-c(trump.approve.posterior.sd, trump.disapprove.posterior.sd),#
-c(rep("Approval", length(trump$Approve)),rep("Disapproval", length(trump$Disapprove))))#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type")
-length(trump.total.frame)
-trump.total.frame <- data.frame(trump$Date,#
-c(trump$Approve, trump$Disapprove),#
-c(trump.approve.posterior.mean, trump.disapprove.posterior.mean),#
-c(trump.approve.posterior.prob, trump.disapprove.posterior.prob),#
-c(trump.approve.posterior.sd, trump.disapprove.posterior.sd),#
-c(rep("Approval", length(trump$Approve)),rep("Disapproval", length(trump$Disapprove))))#
-colnames(trump.total.frame) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type")
-###Create Plots#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, colour=Type) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean), colour=Type) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating")
-###Create Plots#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating")
-approve.mean.plot
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating") +#
- scale_colour_brewer(palette="BuPu", direction=-1)
-approve.mean.plot
-ggplotColours <- function(n = 6, h = c(0, 360) + 15){#
-  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n#
-  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)#
 }
-###Create Plots#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=rev(Type))) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=rev(Type))) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating")
-approve.mean.plot
-###Create Plots#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating")
-approve.mean.plot
-trump.total.frame <- data.frame(trump$Date,#
-c(trump$Disapprove, trump$Approve),#
-c(trump.disapprove.posterior.mean, trump.approve.posterior.mean),#
-c(trump.disapprove.posterior.prob, trump.approve.posterior.prob),#
-c(trump.disapprove.posterior.sd, trump.approve.posterior.sd),#
-c(rep("Disapproval", length(trump$Disapprove)),rep("Approval", length(trump$Approve))))#
-colnames(trump.total.frame) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type")
-###Create Plots#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating")
-approve.mean.plot
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating") +#
-scale_color_hue(direction = 1)
-approve.mean.plot
-###Create Plots#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating") +#
-scale_color_hue(direction = -1)
-approve.mean.plot
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating") +#
-scale_color_hue(direction = -1, h.start=90)
-approve.mean.plot
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating") +#
-scale_color_manual(values = rev(cols))
-approve.mean.plot
-###Create Plots#
-cols <- hue_pal()(2)#
+test.frame <- rbind(readSPX("/Users/lee/Desktop/XG Labs/CUM 7133-6_spectrum.spx"), readMCA("/Users/lee/Desktop/XG Labs/GettyA_4point07_spectrum.spx"), readMCA("/Users/lee/Desktop/XG Labs/HK8_21_spectrum.spx"))
+test.frame <- rbind(readSPT("/Users/lee/Desktop/XG Labs/CUM 7133-6_spectrum.spt"), readSPT("/Users/lee/Desktop/XG Labs/GettyA_4point07_spectrum.spt"), readSPT("/Users/lee/Desktop/XG Labs/HK8_21_spectrum.spt"))
+test.frame <- rbind(readMCA("/Users/lee/Desktop/XG Labs/CUM 7133-6_spectrum.mca"), readMCA("/Users/lee/Desktop/XG Labs/GettyA_4point07_spectrum.mca"), readMCA("/Users/lee/Desktop/XG Labs/HK8_21_spectrum.mca"))
+test.frame <- rbind(readSPX("/Users/lee/Desktop/XG Labs/CUM 7133-6_spectrum.spx"), readMCA("/Users/lee/Desktop/XG Labs/GettyA_4point07_spectrum.spx"), readMCA("/Users/lee/Desktop/XG Labs/HK8_21_spectrum.spx"))
+test.frame <- rbind(readSPX("/Users/lee/Desktop/XG Labs/CUM 7133-6_spectrum.spx"), readSPX("/Users/lee/Desktop/XG Labs/GettyA_4point07_spectrum.spx"), readSPX("/Users/lee/Desktop/XG Labs/HK8_21_spectrum.spx"))
+head(test.frame)
+ggplot(test.frame) +#
+geom_line(aes(Energy, CPS, colour=Spectrum)) +#
+scale_x_continuous(limits=c(5, 20)) +#
+geom_vline(xintercept=8.04,  colour="grey80", linetype=4) +#
+geom_vline(xintercept=10.5,  colour="grey80", linetype=4) +#
+theme_light()
+readSPX <- function(xmlfile){#
+    filename <- gsub(".spx", "", basename(xmlfile))#
+    filename.vector <- rep(filename, 4096)#
+    xmlfile <- xmlTreeParse(xmlfile)#
+    xmllist <- xmlToList(xmlfile)#
+    channels.pre <- xmllist[["ClassInstance"]][["Channels"]][[1]]#
+    counts <- as.numeric(strsplit(channels.pre, ",", )[[1]])#
+    newdata <- as.data.frame(seq(1, 4096, 1))#
+    intercept <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibAbs"]])#
+    slope <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibLin"]])#
+    time <- as.numeric(xmllist[[2]][["TRTHeaderedClass"]][[3]][["LifeTime"]])/1000#
+    cps <- counts/time#
+    energy <- newdata[,1]*slope+intercept#
+    spectra.frame <- data.frame(energy, cps, filename.vector)#
+    colnames(spectra.frame) <- c("Energy", "CPS", "Spectrum")#
+    return(spectra.frame)#
 #
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating") +#
-scale_color_manual(values = rev(cols))
-approve.mean.plot
-###Create Plots#
-cols <- scales::hue_pal()(2)#
-#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating") +#
-scale_color_manual(values = rev(cols))
-approve.mean.plot
-approve.prob.plot <- qplot(as.Date(Date, format="%Y-%m-%d"), PosteriorProb, data=trump.total.frame, geom="line", ylab = "Probability", colour=Type) +#
-theme_bw() +#
-scale_x_date("Date") +#
-scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.333))
-approve.prob.plot
-approve.prob.plot <- qplot(as.Date(Date, format="%Y-%m-%d"), PosteriorProb, data=trump.total.frame, geom="line", ylab = "Probability", colour=Type) +#
-theme_bw() +#
-scale_x_date("Date") +#
-scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.333)) +#
-scale_color_manual(values = rev(cols))
-approve.prob.plot
-layOut = function(...) {#
-    require(grid)#
-    x <- list(...)#
-    n <- max(sapply(x, function(x) max(x[[2]])))#
-    p <- max(sapply(x, function(x) max(x[[3]])))#
-    pushViewport(viewport(layout = grid.layout(n, p)))#
-    for (i in seq_len(length(x))) {#
-        print(x[[i]][[1]], vp = viewport(layout.pos.row = x[[i]][[2]],#
-        layout.pos.col = x[[i]][[3]]))#
-    }#
 }
-layOut(#
-list(approve.mean.plot, 1:70, 1:50)#
-list(approve.prob.plot, 1:30, 1:50)#
-)
-layOut(#
-list(approve.mean.plot, 1:70, 1:50),#
-list(approve.prob.plot, 1:30, 1:50)#
-)
-layOut(#
-list(approve.mean.plot, 1:70, 1:50),#
-list(approve.prob.plot, 71:100, 1:50)#
-)
-library(bcp)#
+test.frame <- rbind(readSPX("/Users/lee/Desktop/XG Labs/CUM 7133-6_spectrum.spx"), readSPX("/Users/lee/Desktop/XG Labs/GettyA_4point07_spectrum.spx"), readSPX("/Users/lee/Desktop/XG Labs/HK8_21_spectrum.spx"))
+ggplot(test.frame) +#
+geom_line(aes(Energy, CPS, colour=Spectrum)) +#
+scale_x_continuous(limits=c(5, 20)) +#
+geom_vline(xintercept=8.04,  colour="grey80", linetype=4) +#
+geom_vline(xintercept=10.5,  colour="grey80", linetype=4) +#
+theme_light()
+shiny::runApp("~/GitHub/cloudCal")
+rtxfile <- "~/Desktop/XG Labs/standards/RTX/testcal.rtx"
+xmlfile <- xmlTreeParse(rtxfile)
+xmllist <- xmlToList(xmlfile)
+str(xmllist)
+ls(xmllist)
+ls(xmllist[[1]])
+ls(xmllist[[2]])
+ls(xmllist[["ClassInstance"]])
+ls(xmllist[["RTHeader"]])
+ls(xmllist[["ClassInstance"]])
+head(xmllist[["ClassInstance"]])
+length(xmllist[["ClassInstance"]])
+length(xmllist[["RTHeader"]])
+xmllist[["RTHeader"]]
+length(xmllist[["ClassInstance"]][[1]])
+xmllist[["ClassInstance"]][[1]]
+length(xmllist[["ClassInstance"]][[2]])
+length(xmllist[["ClassInstance"]][[3]])
+length(xmllist[["ClassInstance"]][[4]])
+length(xmllist[["ClassInstance"]][[5]])
+length(xmllist[["ClassInstance"]][[6]])
+length(xmllist[["ClassInstance"]][[7]])
+length(xmllist[["ClassInstance"]][[8]])
+length(xmllist[["ClassInstance"]][[9]])
+length(xmllist[["ClassInstance"]][[10]])
+length(xmllist[["ClassInstance"]][[11]])
+xmllist[["ClassInstance"]][[6]]
+length(xmllist)
+xmllist[["ClassInstance"]][[3]]
+xmllist[["ClassInstance"]][[2]]
+xmllist[["ClassInstance"]][[1]]
+xmllist
+length(xmlfile)
+length(xmlfile[[1]])
+length(xmlfile[[2]])
+xmllist
+ls(xmllist)
+ls(xmillist[[2]])
+ls(xmillist[[1]])
+xmlllist[[1]]
+xmllist[[1]]
+xmllist[[2]]
+xmllist[[2]][[25]]
+xmllist[[2]][[20]]
+length(xmllist[[2]])
+length(xmllist[[2]][[1]])
+length(xmllist[[2]][[2]])
+n <- length(xmllist[[2]])-2
+n
+n <- (length(xmllist[[2]])-2)/5
+n
+file.index <- seq(n, n^2, n)
+file.index
+xmllist[[2]][[20]][["Name"]]
+file.names <- for(i in n){#
+        xmllist[[2]][[n]][["Name"]]#
+    }
+file.names
+file.names <- for(i in n){#
+        xmllist[[2]][[i]][["Name"]]#
+    }
+file.names
+file.names <- for(i in n){#
+        test <- xmllist[[2]][[i]][["Name"]]#
+        return(test)#
+    }
+file.names
+file.names <- for(i in n){#
+        test[i] <- xmllist[[2]][[i]][["Name"]]#
+        return(test)#
+    }
+file.names
+file.names <- for(i in file.index){#
+        test[i] <- xmllist[[2]][[i]][["Name"]]#
+        return(test)#
+    }
+file.names
+file.list <- lapply(file.index, function(x) xmllist[[2]][[x]][["Name"]])
+file.list
+file.list <- unlist(lapply(file.index, function(x) xmllist[[2]][[x]][["Name"]]))
+file.list
+shiny::runApp("~/GitHub/cloudCal")
+rsconnect::deployApp("~/GitHub/cloudCal", appName="cloudCal")
+update.packages()
 library(ggplot2)#
-library(gridExtra)#
-library(Cairo)#
+library(XML)#
 #
-layOut = function(...) {#
-    require(grid)#
-    x <- list(...)#
-    n <- max(sapply(x, function(x) max(x[[2]])))#
-    p <- max(sapply(x, function(x) max(x[[3]])))#
-    pushViewport(viewport(layout = grid.layout(n, p)))#
-    for (i in seq_len(length(x))) {#
-        print(x[[i]][[1]], vp = viewport(layout.pos.row = x[[i]][[2]],#
-        layout.pos.col = x[[i]][[3]]))#
-    }#
+readSPT <- function(spt.file){#
+	filename <- gsub(".spt", "", basename(spt.file))#
+	filename.vector <- rep(filename, 4096)#
+#
+	meta <- paste0(readLines(spt.file, n=16),collapse=" ")#
+	meta.split <- strsplit(meta, " ")#
+	chan.1 <- as.numeric(meta.split[[1]][32])#
+	energy.1 <- as.numeric(sub(",", ".", meta.split[[1]][33], fixed = TRUE))#
+	chan.2 <- as.numeric(meta.split[[1]][34])#
+	energy.2 <- as.numeric(sub(",", ".", meta.split[[1]][35], fixed = TRUE))#
+	channels <- c(0, chan.1, chan.2)#
+	energies <- c(0, energy.1, energy.2)#
+	energy.cal <- lm(energies~ channels)#
+	time <- as.numeric(meta.split[[1]][17])/1000#
+	raw <- read.table(spt.file, skip=16)#
+	cps <- raw[,1]/time#
+	newdata <- as.data.frame(seq(1, 4096, 1))#
+	colnames(newdata) <- "channels"#
+	energy <- as.vector(predict.lm(energy.cal, newdata=newdata))#
+	energy2 <- newdata[,1]*summary(energy.cal)$coef[2]#
+	spectra.frame <- data.frame(filename.vector, energy, energy2, cps)#
+	colnames(spectra.frame) <- c("Spectra", "Energy", "EnergySimp", "CPS")#
+	return(spectra.frame)#
+}#
+readMCA <- function(mca.file){#
+    filename <- gsub(".mca", "", basename(mca.file))#
+    filename.vector <- rep(filename, 4096)#
+    filepath <- mca.file#
+    full <- read.csv(filepath, row.names=NULL)#
+    chan.1.a.pre <- as.numeric(unlist(strsplit(gsub("# Calibration1: ", "", full[13,1]), " ")))#
+    chan.1.b.pre <- as.numeric(full[13,2])#
+    chan.2.a.pre <- as.numeric(unlist(strsplit(gsub("# Calibration2: ", "", full[14,1]), " ")))#
+    chan.2.b.pre <- as.numeric(full[14,2])#
+    chan.1 <- chan.1.a.pre[1]#
+    energy.1 <- chan.1.a.pre[2] + chan.1.b.pre/(10^nchar(chan.1.b.pre))#
+    chan.2 <- chan.2.a.pre[1]#
+    energy.2 <- chan.2.a.pre[2] + chan.2.b.pre/(10^nchar(chan.2.b.pre))#
+    channels <- c(chan.1, chan.2)#
+    energies <- c(energy.1, energy.2)#
+    energy.cal <- lm(energies~channels)#
+    time.1 <- as.numeric(gsub("# Live time: ", "", full[10,1], " "))#
+    time.2 <- as.numeric(full[10,2])#
+    time <- time.1 + time.2/(10^nchar(time.2))#
+    cps <- as.numeric(full[17:4112, 1])/time#
+    newdata <- as.data.frame(seq(1, 4096, 1))#
+    colnames(newdata) <- "channels"#
+    energy <- as.vector(predict.lm(energy.cal, newdata=newdata))#
+    energy2 <- newdata[,1]*summary(energy.cal)$coef[2]#
+    spectra.frame <- data.frame(energy, cps, filename.vector)#
+    colnames(spectra.frame) <- c("Energy", "CPS", "Spectrum")#
+    return(spectra.frame)#
 }#
 #
-trump.all <- read.table(file="~/Downloads/00c -Pres-45-Trump - Job Approval - National-poll-responses-clean.tsv", header=TRUE, sep="\t")#
+readSPX <- function(xmlfile){#
+    filename <- gsub(".spx", "", basename(xmlfile))#
+    filename.vector <- rep(filename, 4096)#
+    xmlfile <- xmlTreeParse(xmlfile)#
+    xmllist <- xmlToList(xmlfile)#
+    channels.pre <- xmllist[["ClassInstance"]][["Channels"]][[1]]#
+    counts <- as.numeric(strsplit(channels.pre, ",", )[[1]])#
+    newdata <- as.data.frame(seq(1, 4096, 1))#
+    intercept <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibAbs"]])#
+    slope <- as.numeric(xmllist[["ClassInstance"]][["ClassInstance"]][["CalibLin"]])#
+    time <- as.numeric(xmllist[[2]][["TRTHeaderedClass"]][[3]][["LifeTime"]])/1000#
+    cps <- counts/time#
+    energy <- newdata[,1]*slope+intercept#
+    spectra.frame <- data.frame(energy, cps, filename.vector)#
+    colnames(spectra.frame) <- c("Energy", "CPS", "Spectrum")#
+    return(spectra.frame)#
 #
-trump <- as.data.frame(subset(trump.all, trump.all$sample_subpopulation==c("Adults", "Likely Voters", "Registered Voters")))#
-#
-trump$Date <- as.Date(trump$end_date, format="%Y-%m-%d")#
-set.seed(90)#
-trump.approve.bc <- bcp(y=trump$Approve, burnin=2000, mcmc=10000, return.mcmc=TRUE, w0=mean(trump$margin_of_error, na.rm=TRUE)/100, p0=0.01)#
-#
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-#
-trump.disapprove.bc <- bcp(y=trump$Disapprove,  burnin=2000, mcmc=10000, return.mcmc=TRUE, w0=mean(trump$margin_of_error, na.rm=TRUE)/100, p0=0.01)#
-trump.disapprove.posterior.mean <- trump.disapprove.bc$posterior.mean#
-trump.disapprove.posterior.prob <- trump.disapprove.bc$posterior.prob#
-trump.disapprove.posterior.var <- trump.disapprove.bc$posterior.var#
-trump.disapprove.posterior.sd <- sqrt(trump.disapprove.posterior.var)#
-#
-trump.disapprove.bayes.dataframe <- data.frame(trump$Date, trump$Disapprove, trump.disapprove.posterior.mean, trump.disapprove.posterior.prob, trump.disapprove.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Disapprove", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-#
-trump.total.frame <- data.frame(trump$Date,#
-c(trump$Disapprove, trump$Approve),#
-c(trump.disapprove.posterior.mean, trump.approve.posterior.mean),#
-c(trump.disapprove.posterior.prob, trump.approve.posterior.prob),#
-c(trump.disapprove.posterior.sd, trump.approve.posterior.sd),#
-c(rep("Disapproval", length(trump$Disapprove)),rep("Approval", length(trump$Approve))))#
-colnames(trump.total.frame) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type")#
-#
-ggplotColours <- function(n = 6, h = c(0, 360) + 15){#
-    if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n#
-    hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)#
+}#
+read_csv_x <- function(filename) {#
+    x <- as.numeric(substr(strsplit(filename,"\\X ")[[1]][2], 1, 6))#
+    x#
 }#
 #
-###Create Plots#
-cols <- scales::hue_pal()(2)#
-#
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), PosteriorMean, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating %") +#
-scale_color_manual(values = rev(cols))#
-approve.prob.plot <- qplot(as.Date(Date, format="%Y-%m-%d"), PosteriorProb, data=trump.total.frame, geom="line", ylab = "Probability", colour=Type) +#
-theme_bw() +#
-scale_x_date("Date") +#
-scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.333)) +#
-scale_color_manual(values = rev(cols))#
-#
-grid.arrange(approve.mean.plot, approve.prob.plot, nrow=2)#
-ggsave(#
-grid.arrange(approve.mean.plot, approve.prob.plot, nrow=2), file="~/Desktop/TrumpRatings.jpeg", device="jpeg", dpi=300, width=7, height=5)
-runApp("~/GitHub/trumpChangePoint")
-library(shiny)
-runApp("~/GitHub/trumpChangePoint")
-shiny::runApp("~/GitHub/trumpChangePoint")
-library(rsconnect)
-deployApp("~/GitHub/trumpChangePoint", appName="trumpChangePoint")
-shiny::runApp("~/GitHub/trumpChangePoint")
-library(bcp)
-library(ggplot2)
-trump.all <- read.table(file="http://elections.huffingtonpost.com/pollster/api/v2/questions/00c%20-Pres-45-Trump%20-%20Job%20Approval%20-%20National/poll-responses-clean.tsv", header=TRUE, sep="\t")
-trump <- as.data.frame(subset(trump.all, trump.all$sample_subpopulation==c("Adults", "Likely Voters", "Registered Voters")))
-head(trump)
-trump$Date <- as.Date(trump$end_date, format="%Y-%m-%d")#
-set.seed(90)#
-trump.approve.bc <- bcp(y=trump$Approve, burnin=2000, mcmc=10000, return.mcmc=TRUE, w0=mean(trump$margin_of_error, na.rm=TRUE)/100, p0=0.01)#
-#
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")
-shiny::runApp("~/GitHub/trumpChangePoint")
-library(bcp)
-bcp
-shiny::runApp("~/GitHub/trumpChangePoint")
-worker.bcp
-shiny::runApp("~/GitHub/trumpChangePoint")
-ip <- installed.packages()#
-pkgs.to.remove <- ip[!(ip[,"Priority"] %in% c("base", "recommended")), 1]#
-sapply(pkgs.to.remove, remove.packages)
-sapply(pkgs.to.remove, install.packages)
-library(ggplot2)
-library(shiny)
-library(bcp)
-shiny::runApp("~/GitHub/trumpChangePoint")
-install.packages("shinythemes")
-shiny::runApp("~/GitHub/trumpChangePoint")
-ip <- installed.packages()
-ip
-install.packages('Rcpp', type = 'source')#
-install.package('httpuv')
-shiny::runApp("~/GitHub/trumpChangePoint")
-?data.table
-??data.table
-shiny::runApp("~/GitHub/trumpChangePoint")
-test <-     read.table(file="http://elections.huffingtonpost.com/pollster/api/v2/questions/00c%20-Pres-45-Trump%20-%20Job%20Approval%20-%20National/poll-responses-clean.tsv", header=TRUE, sep="\t")
-ls(test)
-shiny::runApp("~/GitHub/trumpChangePoint")
-rsconnect::deployApp("~/GitHub/trumpChangePoint", appName="trumpChangePoint")
-:deployApp("~/GitHub/trumpChangePoint", appName="trumpChangePoint")
-library(rsconnect:)
-install.packages("rsconnect")
-:deployApp("~/GitHub/trumpChangePoint", appName="trumpChangePoint")
-rsconnect::deployApp("~/GitHub/trumpChangePoint", appName="trumpChangePoint")
-shiny::runApp("~/GitHub/trumpChangePoint")
-shiny::runGitHub("leedrakea5/trumpChangePoint")
-shiny::runGitHub("leedrake5/trumpChangePoint")
-rsconnect::deployApp("~/GitHub/trumpChangePoint", appName="trumpChangePoint")
-shiny::runGitHub("leedrakea5/trumpChangePoint")
-shiny::runGitHub("leedrake5/trumpChangePoint")
-Hodder.v <- function(y)#
-{#
-    n<-length(y)#
-    for(i in 1:(n-1)) {#
-        y[i] <- y[i+1] - y[i]#
-        y[1:(n-1)]#
-        y <- abs(y)#
-    }#
-    y <- c(0, y[1:(n-1)])#
-    return(y)#
+read_csv_y <- function(filename) {#
+    y <- as.numeric(substr(strsplit(filename,"\\Y ")[[1]][2], 1, 6))#
+    y#
 }
-trump.all <- read.table(file="http://elections.huffingtonpost.com/pollster/api/v2/questions/00c%20-Pres-45-Trump%20-%20Job%20Approval%20-%20National/poll-responses-clean.tsv", header=TRUE, sep="\t")#
-#
-trump <- as.data.frame(subset(trump.all, trump.all$sample_subpopulation==c("Adults", "Likely Voters", "Registered Voters")))#
-#
-trump$Date <- as.Date(trump$end_date, format="%Y-%m-%d")#
-set.seed(90)#
-trump.approve.bc <- bcp(y=trump$Approve, burnin=2000, mcmc=10000, return.mcmc=TRUE, w0=mean(trump$margin_of_error, na.rm=TRUE)/100, p0=0.01)#
-#
-trump.approve.posterior.mean <- trump.approve.bc$posterior.mean#
-trump.approve.posterior.prob <- trump.approve.bc$posterior.prob#
-trump.approve.posterior.var <- trump.approve.bc$posterior.var#
-trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)#
-#
-trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-#
-trump.disapprove.bc <- bcp(y=trump$Disapprove,  burnin=2000, mcmc=10000, return.mcmc=TRUE, w0=mean(trump$margin_of_error, na.rm=TRUE)/100, p0=0.01)#
-trump.disapprove.posterior.mean <- trump.disapprove.bc$posterior.mean#
-trump.disapprove.posterior.prob <- trump.disapprove.bc$posterior.prob#
-trump.disapprove.posterior.var <- trump.disapprove.bc$posterior.var#
-trump.disapprove.posterior.sd <- sqrt(trump.disapprove.posterior.var)#
-#
-trump.disapprove.bayes.dataframe <- data.frame(trump$Date, trump$Disapprove, trump.disapprove.posterior.mean, trump.disapprove.posterior.prob, trump.disapprove.posterior.sd)#
-colnames(trump.approve.bayes.dataframe) <- c("Date", "Disapprove", "PosteriorMean", "PosteriorProb", "PosteriorSD")#
-#
-trump.total.frame <- data.frame(trump$Date,#
-c(trump$Disapprove, trump$Approve),#
-c(trump.disapprove.posterior.mean, trump.approve.posterior.mean),#
-c(trump.disapprove.posterior.prob, trump.approve.posterior.prob),#
-c(trump.disapprove.posterior.sd, trump.approve.posterior.sd),#
-c(rep("Disapproval", length(trump$Disapprove)),rep("Approval", length(trump$Approve))))#
-colnames(trump.total.frame) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type")
-trump.total.frame$hodder <- Hodder.v(trump.total.frame$PosteriorMean)
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, Rating)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), hodder, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating %") +#
-scale_color_manual(values = rev(cols))
-approve.mean.plot
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, hodder)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), hodder, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating %") +#
-scale_color_manual(values = rev(cols))
-approve.mean.plot
-Hodder.v <- function(y)#
-{#
-    n<-length(y)#
-    for(i in 1:(n-1)) {#
-        y[i] <- y[i+1] - y[i]#
-        y[1:(n-1)]#
-        y <- y#
-    }#
-    y <- c(0, y[1:(n-1)])#
-    return(y)#
-}
-trump.total.frame$hodder <- Hodder.v(trump.total.frame$PosteriorMean)
-approve.mean.plot <- ggplot(trump.total.frame, aes(Date, hodder)) +#
-geom_point(alpha=0.5, aes(colour=Type)) +#
-geom_line(aes(as.Date(Date, format="%Y-%m-%d"), hodder, colour=Type)) +#
-theme_light() +#
-scale_x_date("Date") +#
-scale_y_continuous("Rating %") +#
-scale_color_manual(values = rev(cols))
-approve.mean.plot
-Hodder.v <- function(y)#
-{#
-    n<-length(y)#
-    for(i in 1:(n-1)) {#
-        y[i] <- y[i+1] - y[i]#
-        y[1:(n-1)]#
-        y <- y*-1#
-    }#
-    y <- c(0, y[1:(n-1)])#
-    return(y)#
-}
--5/5
-shiny::runGitHub("leedrake5/trumpChangePoint")
-shiny::runApp("~/GitHub/pollChangePoint")
-rsconnect::deployApp("~/GitHub/pollChangePoint", appName="pollChangePoint")
-runApp("~/GitHub/pollChangePoint")
-rsconnect::deployApp("~/GitHub/pollChangePoint", appName="pollChangePoint")
-rsconnect::deployApp("~/GitHub/trumpChangePoint", appName="trumpChangePoint")
-runApp("~/GitHub/CloudCal")
-test <- readRDS("~/Desktop/caltest1.quant")
-str(test)
-runApp("~/GitHub/CloudCal")
-x <- c("Ca", "P", "S", "Cl")
-y <- c("K", "Fe", "S", "Ca", "Mn")
-x %in% y
-x[x %in% y]
-runApp("~/GitHub/CloudCal")
-x
-y
-runApp("~/GitHub/CloudCal")
-runGitHub("leedrake5/CloudCal")
-runApp("~/GitHub/CloudCal")
-shiny::runApp("~/GitHub/CloudCal")
-rsconnect::deployApp("~/GitHub/CloudCal", appName="cloudCal")
-simulation<-function(nc, ne, s, w, tt){#
-  times1<-0#
-  times2<-0#
-    for(i in 1:tt){#
-#generate data points#
-      data(agpop)#
-#
-     agpop2<-agpop[order(agpop$region),]#
-    library(sampling)#
-    idselected<-strata(agpop2, stratanames=c("region"),size= c(69,7,122,102), method="srswor")#
-    datanew <- getdata(agpop2,idselected)#
-    library(survey)#
-     dstr <- svydesign(id = ~1,strata = ~region, data = datanew, fpc = c(rep(1054,nc),rep(220,ne),rep(1382,s),rep(422,w)))#
-# teststatistics#
-   st <- as.data.frame(svytotal(~acres92, dstr))#
-   TotalEst<-st[,1]#
-SEthat<-st[,2]#
-#
-print(st)#
-#
-    }#
-#
-  }simulation<-function(nc, ne, s, w, tt){#
-  times1<-0#
-  times2<-0#
-    for(i in 1:tt){#
-#generate data points#
-      data(agpop)#
-#
-     agpop2<-agpop[order(agpop$region),]#
-    library(sampling)#
-    idselected<-strata(agpop2, stratanames=c("region"),size= c(69,7,122,102), method="srswor")#
-    datanew <- getdata(agpop2,idselected)#
-    library(survey)#
-     dstr <- svydesign(id = ~1,strata = ~region, data = datanew, fpc = c(rep(1054,nc),rep(220,ne),rep(1382,s),rep(422,w)))#
-# teststatistics#
-   st <- as.data.frame(svytotal(~acres92, dstr))#
-   TotalEst<-st[,1]#
-SEthat<-st[,2]#
-#
-print(st)#
-#
-    }#
-#
-  }
-simulation<-function(nc, ne, s, w, tt){#
-      times1<-0#
-      times2<-0#
-        for(i in 1:tt){#
-        #generate data points#
-              data(agpop)#
-             agpop2<-agpop[order(agpop$region),]#
-            library(sampling)#
-            idselected<-strata(agpop2, stratanames=c("region"),size= c(69,7,122,102), method="srswor")#
-            datanew <- getdata(agpop2,idselected)#
-            library(survey)#
-             dstr <- svydesign(id = ~1,strata = ~region, data = datanew, fpc = c(rep(1054,nc),rep(220,ne),rep(1382,s),rep(422,w)))#
-        # teststatistics#
-           st <- as.data.frame(svytotal(~acres92, dstr))#
-           TotalEst<-st[,1]#
-        SEthat<-st[,2]#
-        print(st)#
-            }#
-      }
-install.packages("SDaA")
-shiny::runApp("~/GitHub/CloudCal")
-rsconnect::deployApp("~/GitHub/CloudCal", appName="cloudCal")
+update.packages()
+myfiles.frame <- read.csv(file="~/Desktop/IStillDontLikeTrump.csv")
+head(myfiles.frame)
+myfiles.frame$ElementLine <- paste0(myfiles.frame$Element, myfiles.frame$Line, sep=".")
+head(myfiles.frame)
+myfiles.frame$ElementLine <- paste0(myfiles.frame$Element, ".", myfiles.frame$Line)
+myfiles.frame
+myfiles.frame <- read.csv(file="~/Desktop/IStillDontLikeTrump.csv")
+myfiles.frame$ElementLine <- paste0(myfiles.frame$Element, ".", myfiles.frame$Line)
+head(myfiles.frame)
+data <- reshape2::dcast(myfiles.frame, x+y~ElementLine)
+head(data)
+data <- reshape2::dcast(myfiles.frame, x+y~ElementLine, aggregate=mean)
+head(data)
+data <- reshape2::dcast(myfiles.frame, x+y~ElementLine, value.var=Net)
+data <- reshape2::dcast(myfiles.frame, x+y~ElementLine, value.var="Net")
+head(data)
+?dcast
+data <- reshape2::dcast(myfiles.frame, x+y~ElementLine, value.var="Net", fun.aggregate=mean)
+head(data)
+length(data$x)
+length(myfiles.frame$x)
+metadata.dat <- data
+options <- strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), sep=".")
+options <- strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split=".")
+options[1]
+options[2]
+length(options)
+colnames(metadata.dat[,3:length(metadata.dat)])
+options <- strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")
+options
+options <- as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]"))
+options
+options <- t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))
+options
+options <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,1])
+options
+line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,2])
+line.names
+fishSubset3 <- data[,c("x", "y", paste0("K", ".", "12"))]
+paste0("K", ".", "12")
+fishSubset3 <- data[,c("x", "y", paste0("K", ".", "K12"))]
+head(fishSubset3)
+colnames(fishSubset3)[3] <- "Net"
+head(fishSubset3)
 shiny::runApp("~/GitHub/Cezanne")
-shiny::runApp("~/GitHub/CloudCal")
-x <- c(1, 2, 3, 4, 5, 6)
-y <- c(3, 4, 5, 6, 7, 8, 9)
-match(x, y)
-?match
-x %in% y
-match(x, y, na.rm=TRUE)
-complete.cases(match(x, y))
-complete.cases(match(x, y))
-na.rm(match(x, y))
-na.omit(match(x, y))
-na.omit(match(x, y))[,1]
-na.omit(match(x, y))[1]
-na.omit(match(x, y))
-na.omit(match(x, y))[[1]]
-na.omit(match(x, y))$1
-na.omit(match(x, y))[,1]
-na.omit(match(x, y))[1,
-]
-na.omit(match(x, y))[1]
-x[!is.na(match(x, y))]
-shiny::runApp("~/GitHub/CloudCal")
+?loadWorkbook
+??loadWorkbook
+library(openxlsx)
+proto.fish <- loadWorkbook(file="~/Desktop/Slide/Obsidian Test.xlsx")
+fish.sheets <- getSheets(proto.fish)
+ls(proto.fish)
+ls(proto.fish[["worksheets"]])
+proto.fish
+fish.sheets <- getSheetNames(proto.fish)
+proto.fish <- readWorkbook(file=inFile$datapath)
+proto.fish <- readWorkbook(file="~/Desktop/Slide/Obsidian Test.xlsx")
+new.fish <- readWorkbook(proto.fish)
+ls(new.fish)
+new.fish
+?readWorkbook
+new.fish <- readWorkbook(proto.fish, sheet=2)
+head(new.fish)
+just.fish <- readWorkbook(proto.fish, sheet=2)
+new.fish <- just.fish[,-1]
+head(new.fish)
+new.fish$x <- read_csv_x(just.fish[,1])
+head(new.fish)
+filename <- just.fish$X1[1]
+filename
+proto.fish <- loadWorkbook(file="~/Desktop/Cezanne Stuff/BF1179/BF1179 decon.xlsx")
+just.fish <- readWorkbook(proto.fish, sheet=2)
+new.fish <- just.fish[,-1]
+new.fish$x <- read_csv_x(just.fish[,1])
+head(new.fish)
+new.fish$y <- read_csv_y(just.fish[,1])
+head(new.fish)
+tail(new.fish)
+just.fish[,1][1]
+just.fish[,1000][1]
+just.fish[,100][1]
+just.fish[,10][1]
+just.fish[,1][1000]
+test <- unique(new.fish$y)
+test
+new.fish$x <- do.call(read_csv_x, just.fish[,1])
+new.fish$x <- do.call(read_csv_x, list(just.fish[,1]))
+head(new.fish$x)
+tail(new.fish$x)
+unique(new.fish$x)
+just.fish[,1]
+new.fish$x <- as.numeric(substr(strsplit(just.fish[,1],"\\X ")[[1]][2], 1, 6))
+length(unique(new.fish$x))
+new.fish$x <- sapply(just.fish[,1], read_csv_x)
+length(unique(new.fish$x))
+head(new.fish$x)
+new.fish$y <- sapply(just.fish[,1], read_csv_y)
+head(new.fish)
+tail(new.fish)
+final.fish <- new.fish[,c("x", "y", names(just.fish[,-1]))]
+head(final.fish)
 shiny::runApp("~/GitHub/Cezanne")
+test.frame <- data.frame(final.fish$x, final.fish$y, just.fish[,1])
+head(test.frame)
+tail(test.frame)
 shiny::runApp("~/GitHub/Cezanne")

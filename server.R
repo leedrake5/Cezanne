@@ -19,6 +19,7 @@ library(reshape2)
 library(pbapply)
 library(akima)
 library(parallel)
+library(stringi)
 
 
 options(shiny.maxRequestSize=9000000*1024^2)
@@ -404,15 +405,7 @@ outElements <- reactive({
     
 })
 
-outLines <- reactive({
-    metadata.dat <- dataHold()
-    
-    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,2])
 
-    line.names
-    
-    
-})
 
 
 
@@ -421,80 +414,33 @@ output$inElements <- renderUI({
     selectInput(inputId = "elements", label = h4("Element"), choices =  outElements())
 })
 
+
+outLines <- reactive({
+    
+    metadata.dat <- dataHold()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$elements
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
 output$inLines <- renderUI({
     selectInput(inputId = "lines", label = h4("Fluorescence Line"), choices =  outLines())
 })
 
 
-####Three Element Plot
-output$in3Element1 <- renderUI({
-    selectInput(inputId = "threeelement1", label = h4("Element"), choices =  outElements(), selected=outElements()[1])
-})
-
-output$in3Line1 <- renderUI({
-    selectInput(inputId = "threeline1", label = h4("Fluorescence Line"), choices =  outLines())
-})
-
-output$in3Element2 <- renderUI({
-    selectInput(inputId = "threeelement2", label = h4("Element"), choices =  outElements(), selected=outElements()[2])
-})
-
-output$in3Line2 <- renderUI({
-    selectInput(inputId = "threeline2", label = h4("Fluorescence Line"), choices =  outLines())
-})
-
-output$in3Element3 <- renderUI({
-    selectInput(inputId = "threeelement3", label = h4("Element"), choices =  outElements(), selected=outElements()[3])
-})
-
-output$in3Line3 <- renderUI({
-    selectInput(inputId = "threeline3", label = h4("Fluorescence Line"), choices =  outLines())
-})
-
-
-
-####Five Element Plot
-output$in5Element1 <- renderUI({
-    selectInput(inputId = "fiveelement1", label = h4("Element"), choices =  outElements(), selected=outElements()[1])
-})
-
-output$in5Line1 <- renderUI({
-    selectInput(inputId = "fiveline1", label = h4("Fluorescence Line"), choices =  outLines())
-})
-
-output$in5Element2 <- renderUI({
-    selectInput(inputId = "fiveelement2", label = h4("Element"), choices =  outElements(), selected=outElements()[2])
-})
-
-output$in5Line2 <- renderUI({
-    selectInput(inputId = "fiveline2", label = h4("Fluorescence Line"), choices =  outLines())
-})
-
-output$in5Element3 <- renderUI({
-    selectInput(inputId = "fiveelement3", label = h4("Element"), choices =  outElements(), selected=outElements()[3])
-})
-
-output$in5Line3 <- renderUI({
-    selectInput(inputId = "fiveline3", label = h4("Fluorescence Line"), choices =  outLines())
-})
-
-output$in5Element4 <- renderUI({
-    selectInput(inputId = "fiveelement4", label = h4("Element"), choices =  outElements(), selected=outElements()[4])
-})
-
-output$in5Line4 <- renderUI({
-    selectInput(inputId = "fiveline4", label = h4("Fluorescence Line"), choices =  outLines())
-})
-
-output$in5Element5 <- renderUI({
-    selectInput(inputId = "fiveelement5", label = h4("Element"), choices =  outElements(), selected=outElements()[5])
-})
-
-output$in5Line5 <- renderUI({
-    selectInput(inputId = "fiveline5", label = h4("Fluorescence Line"), choices =  outLines())
-})
 
 ranges1 <- reactiveValues(x = NULL, y = NULL)
+
+
+
 
 
 
@@ -526,6 +472,47 @@ myData <- reactive({
     
     
 })
+
+
+
+
+
+lineOptions <- reactive({
+    
+    spectra.line.table <- myData()
+    
+    element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
+    
+    element.names
+    
+})
+
+defaultLines <- reactive({
+    
+    spectra.line.table <- myData()
+    
+    element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
+    
+    element.names[1:3]
+    
+})
+
+
+
+
+
+
+output$defaultlines <- renderUI({
+    
+    
+    checkboxGroupInput('show_vars', 'Elemental lines to show:',
+    choices=lineOptions(), selected = NULL)
+})
+
+
+
+
+#####Single Element Map
 
 
 interpSinglePrep <- reactive({
@@ -561,7 +548,7 @@ interpSinglePrep <- reactive({
     fish.int.melt$z <- as.numeric(ifelse(fish.int.melt$z < 0, 0, fish.int.melt$z))
     
     fish.int.melt[complete.cases(fish.int.melt), ]
-
+    
 })
 
 normSinglePrep <- reactive({
@@ -570,7 +557,7 @@ normSinglePrep <- reactive({
     #fishSubset <- fishImport %>% filter(Line==input$lines & Element==input$elements)
     fishSubset <- fishImport[,c("x", "y", paste0(input$elements, ".", input$lines))]
     colnames(fishSubset)[3] <- "Net"
-
+    
     
     
     fish.norm <- data.frame(fishSubset$x, fishSubset$y, fishSubset$Net)
@@ -582,14 +569,14 @@ normSinglePrep <- reactive({
     
     
     fish.norm
-   
+    
     
 })
 
 
 plotSinglePrep <- reactive({
     
-  fish <- if(input$useinterp==FALSE){
+    fish <- if(input$useinterp==FALSE){
         normSinglePrep()
     } else if(input$useinterp==TRUE){
         interpSinglePrep()
@@ -598,8 +585,8 @@ plotSinglePrep <- reactive({
     fish <- subset(fish, altz > input$threshhold)
     
     fish
-
-
+    
+    
     
 })
 
@@ -632,7 +619,7 @@ singlePlotType <- reactive({
 })
 
 plotInputSingle <- reactive({
-
+    
     
     colvals <- if(singlePlotType()=="ColorRamp"){
         as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
@@ -645,30 +632,30 @@ plotInputSingle <- reactive({
     } else if(input$useinterp==FALSE){
         normSinglePrep()
     }
-   
-   colorramp.plot <- ggplot(fish) +
-   geom_tile(aes(x, y,  fill=z, alpha=altz)) +
-   #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-   scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
-   scale_alpha_continuous("Net Counts", range=c(0, 1)) +
-   coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
-   guides(alpha=FALSE) +
-   scale_x_continuous("X (mm)") +
-   scale_y_continuous("Y (mm)") +
-   theme_classic()
-   
-   bw.plot <- ggplot(fish) +
-   geom_tile(aes(x, y,  fill=z, alpha=altz)) +
-   #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-   scale_fill_gradient2("Net Counts", low="white", high="black", na.value = "white") +
-   scale_alpha_continuous("Net Counts", range=c(0, 1)) +
-   coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
-   guides(alpha=FALSE) +
-   scale_x_continuous("X (mm)") +
-   scale_y_continuous("Y (mm)") +
-   theme_classic()
-   
-
+    
+    colorramp.plot <- ggplot(fish) +
+    geom_tile(aes(x, y,  fill=z, alpha=altz)) +
+    #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+    scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
+    scale_alpha_continuous("Net Counts", range=c(0, 1)) +
+    coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
+    guides(alpha=FALSE) +
+    scale_x_continuous("X (mm)") +
+    scale_y_continuous("Y (mm)") +
+    theme_classic()
+    
+    bw.plot <- ggplot(fish) +
+    geom_tile(aes(x, y,  fill=z, alpha=altz)) +
+    #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+    scale_fill_gradient2("Net Counts", low="white", high="black", na.value = "white") +
+    scale_alpha_continuous("Net Counts", range=c(0, 1)) +
+    coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
+    guides(alpha=FALSE) +
+    scale_x_continuous("X (mm)") +
+    scale_y_continuous("Y (mm)") +
+    theme_classic()
+    
+    
     
     
     
@@ -677,7 +664,7 @@ plotInputSingle <- reactive({
     } else  if(singlePlotType()=="BW"){
         bw.plot
     }
-  
+    
     
 })
 
@@ -685,7 +672,7 @@ plotInputSingle <- reactive({
 output$simpleMap <- renderPlot({
     
     input$actionprocess1
-
+    
     isolate(plotInputSingle())
 })
 
@@ -696,7 +683,7 @@ output$hover_infosimp <- renderUI({
     
     isolate(point.table <- plotSinglePrep())
     
-
+    
     
     hover <- input$plot_hoversimp
     point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
@@ -759,10 +746,338 @@ content = function(file) {
 )
 
 
+#####PCA Analysis
+
+xrfKReactive <- reactive({
+    
+    spectra.line.table <- myData()
+    
+    xrf.pca.frame <- spectra.line.table[,input$show_vars]
+    xrf.pca.frame <- xrf.pca.frame[complete.cases(xrf.pca.frame),]
+    
+    
+    
+    xrf.k <- kmeans(xrf.pca.frame, input$knum, iter.max=1000, nstart=15, algorithm=c("Hartigan-Wong"))
+    xrf.pca <- prcomp(xrf.pca.frame, scale.=FALSE)
+    
+    xrf.scores <- as.data.frame(xrf.pca$x)
+    
+    score.names <- colnames(xrf.scores)
+    
+    stri_sub(score.names, 1, 2) <- "PC."
+    colnames(xrf.scores) <- score.names
+    
+    cluster.frame <- data.frame(spectra.line.table, xrf.k$cluster, xrf.scores)
+    
+    colnames(cluster.frame) <- c(names(spectra.line.table), "Cluster.Cluster", names(xrf.scores) )
+    
+    cluster.frame
+    
+    
+    
+})
+
+
+choiceLinesPCA <- reactive({
+    
+    spectra.line.table <- xrfKReactive()
+    
+    element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
+    
+    element.names
+    
+    
+})
+
+
+outElementsPCA <- reactive({
+    metadata.dat <- xrfKReactive()
+    
+    element.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,1])
+    
+    element.names
+    
+    
+})
+
+
+###Three Element Map
+
+output$in3Element1 <- renderUI({
+    selectInput(inputId = "threeelement1", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[1])
+})
+
+outLinesPCA_3p1 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$threeelement1
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+
+
+output$in3Line1 <- renderUI({
+    selectInput(inputId = "threeline1", label = h4("Fluorescence Line"), choices =  outLinesPCA_3p1())
+})
+
+output$in3Element2 <- renderUI({
+    selectInput(inputId = "threeelement2", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[2])
+})
+
+
+outLinesPCA_3p2 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$threeelement2
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+output$in3Line2 <- renderUI({
+    selectInput(inputId = "threeline2", label = h4("Fluorescence Line"), choices =  outLinesPCA_3p2())
+})
+
+output$in3Element3 <- renderUI({
+    selectInput(inputId = "threeelement3", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[3])
+})
+
+outLinesPCA_3p3 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$threeelement3
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+output$in3Line3 <- renderUI({
+    selectInput(inputId = "threeline3", label = h4("Fluorescence Line"), choices =  outLinesPCA_3p3())
+})
+
+
+
+###Five Element Map
+
+output$in5Element1 <- renderUI({
+    selectInput(inputId = "fiveelement1", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[1])
+})
+
+outLinesPCA_5p1 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$fiveelement1
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+output$in5Line1 <- renderUI({
+    selectInput(inputId = "fiveline1", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p1())
+})
+
+output$in5Element2 <- renderUI({
+    selectInput(inputId = "fiveelement2", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[2])
+})
+
+outLinesPCA_5p2 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$fiveelement2
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+
+output$in5Line2 <- renderUI({
+    selectInput(inputId = "fiveline2", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p2())
+})
+
+output$in5Element3 <- renderUI({
+    selectInput(inputId = "fiveelement3", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[3])
+})
+
+outLinesPCA_5p3 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$fiveelement3
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+
+output$in5Line3 <- renderUI({
+    selectInput(inputId = "fiveline3", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p3())
+})
+
+output$in5Element4 <- renderUI({
+    selectInput(inputId = "fiveelement4", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[4])
+})
+
+outLinesPCA_5p4 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$fiveelement4
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+output$in5Line4 <- renderUI({
+    selectInput(inputId = "fiveline4", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p4())
+})
+
+output$in5Element5 <- renderUI({
+    selectInput(inputId = "fiveelement5", label = h4("Element"), choices =  outElementsPCA(), selected=outElementsPCA()[5])
+})
+
+outLinesPCA_5p5 <- reactive({
+    
+    metadata.dat <- xrfKReactive()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$fiveelement5
+    
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+    
+})
+
+
+output$in5Line5 <- renderUI({
+    selectInput(inputId = "fiveline5", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p5())
+})
+
+
+
+
+
+
+
+plotInput2 <- reactive({
+    
+    spectra.line.table <- xrfKReactive()
+    
+    
+    
+    regular <- ggplot(data= spectra.line.table) +
+    geom_point(aes(PC.1, PC.2, colour=as.factor(Cluster.Cluster), shape=as.factor(Cluster.Cluster)), size = input$spotsize+1) +
+    geom_point(aes(PC.1, PC.2), colour="grey30", size=input$spotsize-2) +
+    scale_x_continuous("Principle Component 1") +
+    scale_y_continuous("Principle Component 2") +
+    theme_light() +
+    theme(axis.text.x = element_text(size=15)) +
+    theme(axis.text.y = element_text(size=15)) +
+    theme(axis.title.x = element_text(size=15)) +
+    theme(axis.title.y = element_text(size=15, angle=90)) +
+    theme(plot.title=element_text(size=20)) +
+    theme(legend.title=element_text(size=15)) +
+    theme(legend.text=element_text(size=15)) +
+    scale_shape_manual("Cluster", values=1:nlevels(as.factor(spectra.line.table$Cluster.Cluster))) +
+    scale_colour_discrete("Cluster") +
+    geom_point(aes(PC.1, PC.2), colour="grey30", size=input$spotsize-2)
+    
+    
+    ellipse <- ggplot(data= spectra.line.table)+
+    geom_point(aes(PC.1, PC.2, colour=as.factor(Cluster.Cluster), shape=as.factor(Cluster.Cluster)), size = input$spotsize+1) +
+    geom_point(aes(PC.1, PC.2), colour="grey30", size=input$spotsize-2) +
+    scale_x_continuous("Principle Component 1") +
+    scale_y_continuous("Principle Component 2") +
+    theme_light() +
+    stat_ellipse(aes(PC.1, PC.2, colour=as.factor(Cluster.Cluster), linetype=as.factor(Cluster.Cluster))) +
+    theme(axis.text.x = element_text(size=15)) +
+    theme(axis.text.y = element_text(size=15)) +
+    theme(axis.title.x = element_text(size=15)) +
+    theme(axis.title.y = element_text(size=15, angle=90)) +
+    theme(plot.title=element_text(size=20)) +
+    theme(legend.title=element_text(size=15)) +
+    theme(legend.text=element_text(size=15)) +
+    guides(linetype=FALSE) +
+    scale_shape_manual("Cluster", values=1:nlevels(as.factor(spectra.line.table$Cluster.Cluster))) +
+    scale_colour_discrete("Cluster") +
+    geom_point(aes(PC.1, PC.2), colour="grey30", size=input$spotsize-2)
+
+    
+    if (input$elipseplot1 == TRUE) {
+        ellipse
+    } else if (input$elipseplot1 == FALSE) {
+        regular
+    }
+    
+    
+    
+})
+
+
+output$xrfpcaplot <- renderPlot({
+    plotInput2()
+    
+})
+
+
+
 
 interpSplit3one <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
     #fishSubset1 <- fishImport %>% filter(Line==input$threeline1 & Element==input$threeelement1)
     fishSubset1 <- fishImport[,c("x", "y", paste0(input$threeelement1, ".", input$threeline1))]
@@ -804,7 +1119,7 @@ interpSplit3one <- reactive({
 
 interpSplit3two <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
     #fishSubset2 <- fishImport %>% filter(Line==input$threeline2 & Element==input$threeelement2)
     fishSubset2 <- fishImport[,c("x", "y", paste0(input$threeelement2, ".", input$threeline2))]
@@ -843,7 +1158,7 @@ interpSplit3two <- reactive({
 
 interpSplit3three <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
     #fishSubset3 <- fishImport %>% filter(Line==input$threeline3 & Element==input$threeelement3)
     fishSubset3 <- fishImport[,c("x", "y", paste0(input$threeelement3, ".", input$threeline3))]
@@ -1082,7 +1397,7 @@ interpSplit5one <- reactive({
 
 interpSplit5two <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
     
     #fishSubset2 <- fishImport %>% filter(Line==input$fiveline2 & Element==input$fiveelement2)
@@ -1128,7 +1443,7 @@ interpSplit5two <- reactive({
 
 interpSplit5three <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
     #fishSubset3 <- fishImport %>% filter(Line==input$fiveline3 & Element==input$fiveelement3)
     fishSubset3 <- fishImport[,c("x", "y", paste0(input$fiveelement3, ".", input$fiveline3))]
@@ -1172,7 +1487,7 @@ interpSplit5three <- reactive({
 
 interpSplit5four <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
     #fishSubset4 <- fishImport %>% filter(Line==input$fiveline4 & Element==input$fiveelement4)
     fishSubset4 <- fishImport[,c("x", "y", paste0(input$fiveelement4, ".", input$fiveline4))]
@@ -1214,7 +1529,7 @@ interpSplit5four <- reactive({
 
 interpSplit5five <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
    
    #fishSubset5 <- fishImport %>% filter(Line==input$fiveline5 & Element==input$fiveelement5)
