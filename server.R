@@ -477,37 +477,6 @@ myData <- reactive({
 
 
 
-lineOptions <- reactive({
-    
-    spectra.line.table <- myData()
-    
-    element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
-    
-    element.names
-    
-})
-
-defaultLines <- reactive({
-    
-    spectra.line.table <- myData()
-    
-    element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
-    
-    element.names[1:3]
-    
-})
-
-
-
-
-
-
-output$defaultlines <- renderUI({
-    
-    
-    checkboxGroupInput('show_vars', 'Elemental lines to show:',
-    choices=lineOptions(), selected = NULL)
-})
 
 
 
@@ -747,6 +716,39 @@ content = function(file) {
 
 
 #####PCA Analysis
+
+
+lineOptions <- reactive({
+    
+    spectra.line.table <- myData()
+    
+    element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
+    
+    element.names
+    
+})
+
+defaultLines <- reactive({
+    
+    spectra.line.table <- myData()
+    
+    element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
+    
+    element.names[1:3]
+    
+})
+
+
+
+
+
+
+output$defaultlines <- renderUI({
+    
+    
+    checkboxGroupInput('show_vars', 'Elemental lines to show:',
+    choices=lineOptions(), selected = defaultLines())
+})
 
 xrfKReactive <- reactive({
     
@@ -1733,6 +1735,369 @@ content = function(file) {
 }
 )
 
+
+
+ratioFrame <- reactive({
+    
+    spectra.line.table <- xrfKReactive()
+    spectra.line.table$None <- rep(1, length(spectra.line.table$x))
+    
+    spectra.line.table
+
+})
+
+
+
+outElementsRatio <- reactive({
+    metadata.dat <- ratioFrame()
+    
+    element.names <- unique(t(as.data.frame(strsplit(colnames(metadata.dat[,3:length(metadata.dat)]), split="[.]")))[,1])
+    
+    element.names
+    
+    
+})
+
+
+
+
+
+
+ratioChooseAElement <- reactive({
+    
+   outElementsPCA()[2]
+   
+})
+
+
+
+output$inelementratioa <- renderUI({
+    selectInput("elementratioa", "Element A", choices=outElementsPCA(), selected=ratioChooseAElement())
+})
+
+
+
+ratioChooseALine <- reactive({
+    
+    
+    metadata.dat <- ratioFrame()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$elementratioa
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+})
+
+output$inlineratioa <- renderUI({
+    
+    if(input$elementratioa!="None"){
+    selectInput("lineratioa", label=NULL, choices=ratioChooseALine())
+    }else{
+        p()
+    }
+})
+
+
+
+ratioChooseBElement <- reactive({
+
+        "None"
+    
+})
+
+output$inelementratiob <- renderUI({
+    selectInput("elementratiob", "Element B", choices=outElementsRatio(), selected=ratioChooseBElement())
+})
+
+ratioChooseBLine <- reactive({
+    
+    
+    metadata.dat <- ratioFrame()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$elementratiob
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+})
+
+
+output$inlineratiob <- renderUI({
+    
+    if(input$elementratiob!="None"){
+        selectInput("lineratiob", label=NULL, choices=ratioChooseBLine())
+    }else{
+        p()
+    }
+})
+
+
+
+ratioChooseCElement <- reactive({
+
+    outElementsPCA()[4]
+    
+})
+
+output$inelementratioc <- renderUI({
+    selectInput("elementratioc", "Element C", choices=outElementsPCA(), selected=ratioChooseCElement())
+})
+
+
+ratioChooseCLine <- reactive({
+    
+    
+    metadata.dat <- ratioFrame()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$elementratioc
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+})
+
+
+output$inlineratioc <- renderUI({
+    
+    if(input$elementratioc!="None"){
+        selectInput("lineratioc", label=NULL, choices=ratioChooseCLine())
+    }else{
+        p()
+    }
+})
+
+
+ratioChooseDElement <- reactive({
+
+        "None"
+        
+})
+
+
+output$inelementratiod <- renderUI({
+    selectInput("elementratiod", "Element D", choices=outElementsRatio(), selected=ratioChooseDElement())
+})
+
+
+ratioChooseDLine <- reactive({
+    
+    metadata.dat <- ratioFrame()
+    
+    element.is <- gsub("[.].*$", "", colnames(metadata.dat))==input$elementratiod
+    
+    metadata.small <- metadata.dat[,c(element.is), drop=FALSE]
+    
+    
+    line.names <- unique(t(as.data.frame(strsplit(colnames(metadata.small), split="[.]")))[,2])
+    
+    line.names
+    
+})
+
+output$inlineratiod <- renderUI({
+    
+    if(input$elementratiod!="None"){
+        selectInput("lineratiod", label=NULL, choices=ratioChooseDLine())
+    }else{
+        p()
+    }
+})
+
+
+
+
+
+
+hoverHoldRatio <- reactive({
+    
+    spectra.line.table <- ratioFrame()
+    
+    
+    
+    first.ratio <- spectra.line.table[paste0(input$elementratioa, ".", input$lineratioa)]
+
+        
+        
+    second.ratio <- if(input$elementratiob!="None") {
+            spectra.line.table[paste0(input$elementratiob, ".", input$lineratiob)]
+        }else{
+            spectra.line.table["None"]
+        }
+        
+    third.ratio <- spectra.line.table[paste0(input$elementratioc, ".", input$lineratioc)]
+
+        
+    fourth.ratio <- if(input$elementratiod!="None") {
+            spectra.line.table[paste0(input$elementratiod, ".", input$lineratiod)]
+        }else{
+            spectra.line.table["None"]
+        }
+        
+
+
+    
+    
+    ratio.frame <- data.frame(first.ratio, second.ratio, third.ratio, fourth.ratio, spectra.line.table$Cluster, spectra.line.table$x, spectra.line.table$y)
+    colnames(ratio.frame) <- gsub("[.]", "", c(substr(input$elementratioa, 1, 2), substr(input$elementratiob, 1, 2), substr(input$elementratioc, 1, 2), substr(input$elementratiod, 1, 2), "Cluster", "x", "y"))
+    
+    
+    
+    ratio.frame$W <- if(input$elementratiob!="None"){
+        ratio.frame[,1]/ratio.frame[,2]
+    }else{
+        ratio.frame[,1]
+    }
+    
+    ratio.frame$Z <- if(input$elementratiod!="None"){
+        ratio.frame[,3]/ratio.frame[,4]
+    }else{
+        ratio.frame[,3]
+    }
+    
+
+    
+    ratio.frame
+    
+})
+
+
+
+plotInput4 <- reactive({
+    ratio.frame <- hoverHoldRatio()
+    
+    if(input$elementratiob!="None"){ratio.names.x <- c(names(ratio.frame[1]), "/", names(ratio.frame[2]))}
+    if(input$elementratiod!="None"){ratio.names.y <- c(names(ratio.frame[3]), "/", names(ratio.frame[4]))}
+    
+    if(input$elementratiob=="None"){ratio.names.x <- c(names(ratio.frame[1]))}
+    if(input$elementratiod=="None"){ratio.names.y <- c(names(ratio.frame[3]))}
+    
+    ratio.names.x <- paste(ratio.names.x, sep=",", collapse="")
+    ratio.names.y <- paste(ratio.names.y, sep=",", collapse="")
+    
+    
+    cluster.ratio.plot <- qplot(W, Z, data=ratio.frame, xlab = ratio.names.x, ylab = ratio.names.y ) +
+    geom_point(aes(colour=as.factor(ratio.frame$Cluster), shape=as.factor(ratio.frame$Cluster)), size=input$spotsize2+1) +
+    geom_point(colour="grey30", size=input$spotsize2-2) +
+    scale_shape_manual("Cluster", values=1:nlevels(as.factor(as.factor(ratio.frame$Cluster)))) +
+    scale_colour_discrete("Cluster") +
+    theme_light() +
+    theme(axis.text.x = element_text(size=15)) +
+    theme(axis.text.y = element_text(size=15)) +
+    theme(axis.title.x = element_text(size=15)) +
+    theme(axis.title.y = element_text(size=15, angle=90)) +
+    theme(plot.title=element_text(size=20)) +
+    theme(legend.title=element_text(size=15)) +
+    theme(legend.text=element_text(size=15)) +
+    geom_point(colour="grey30", size=input$spotsize2-2, alpha=0.01)
+    
+    cluster.ratio.ellipse.plot <- qplot(W, Z, data=ratio.frame, xlab = ratio.names.x, ylab = ratio.names.y ) +
+    stat_ellipse(aes(ratio.frame$W, ratio.frame$Z, colour=as.factor(ratio.frame$Cluster))) +
+    geom_point(aes(colour=as.factor(ratio.frame$Cluster), shape=as.factor(ratio.frame$Cluster)), size=input$spotsize2+1) +
+    geom_point(colour="grey30", size=input$spotsize2-2) +
+    scale_shape_manual("Cluster", values=1:nlevels(as.factor(as.factor(ratio.frame$Cluster)))) +
+    scale_colour_discrete("Cluster") +
+    theme_light() +
+    theme(axis.text.x = element_text(size=15)) +
+    theme(axis.text.y = element_text(size=15)) +
+    theme(axis.title.x = element_text(size=15)) +
+    theme(axis.title.y = element_text(size=15, angle=90)) +
+    theme(plot.title=element_text(size=20)) +
+    theme(legend.title=element_text(size=15)) +
+    theme(legend.text=element_text(size=15)) +
+    geom_point(colour="grey30", size=input$spotsize2-2, alpha=0.01)
+    
+    
+    
+    if (input$elipseplot2==FALSE) {
+        cluster.ratio.plot
+    } else if (input$elipseplot2==TRUE) {
+        cluster.ratio.ellipse.plot
+    }
+    
+})
+
+
+output$elementratiotimeseries <- renderPlot({
+    plotInput4()
+    
+    
+})
+
+
+
+
+
+
+
+output$hover_inforatio <- renderUI({
+    
+    point.table <- hoverHoldRatio()
+    
+    hover <- input$plot_hoverratio
+    point <- nearPoints(point.table,  coordinfo=hover,   threshold = 5, maxpoints = 1, addDist = TRUE)
+    if (nrow(point) == 0) return(NULL)
+    
+    
+    # calculate point position INSIDE the image as percent of total dimensions
+    # from left (horizontal) and from top (vertical)
+    left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+    top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+    
+    # calculate distance from left and bottom side of the picture in pixels
+    left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+    top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+    
+    
+    
+    
+    
+    # create style property fot tooltip
+    # background color is set so tooltip is a bit transparent
+    # z-index is set so we are sure are tooltip will be on top
+    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+    
+    # actual tooltip created as wellPanel
+    wellPanel(
+    style = style,
+    p(HTML(paste0("<b> X: </b>", point$x, "<br/>",
+    "<b> Y: </b>", point$y, "<br/>",
+
+    
+    
+    
+    )))
+    )
+})
+
+ratioTerm <- reactive({
+    
+    ratio.names <- paste(c(c(substr(input$elementratioa, 1,2), "-", substr(input$elementratiob, 1, 2)), "_", c(substr(input$elementratioc,1,2), "-", substr(input$elementratiod,1,2), "_RatioPlot")), collapse="")
+    ratio.label <- paste(c(input$projectname, "_", ratio.names), collapse='')
+    ratio.label
+})
+
+output$downloadPlot4 <- downloadHandler(
+
+
+filename = function() { paste(ratioTerm(), '.tiff', sep='') },
+content = function(file) {
+    ggsave(file,plotInput4(), device="tiff", compression="lzw", type="cairo",  dpi=300, width=12, height=7)
+}
+)
 
 
  

@@ -98,7 +98,7 @@ uiOutput('pcaFocusUI'),
 uiOutput('pcaFocusLabel'),
 
 
-sliderInput("spotsize", label = "Point Size", value=5, min=2, max=15),
+sliderInput("spotsize", label = "Point Size", value=2, min=2, max=15),
 
 checkboxInput('elipseplot1', "Elipse"),
 checkboxInput('logtrans', "Log Transform"),
@@ -289,6 +289,70 @@ uiOutput("hover_info5"))
 
 
 )
+
+
+),
+
+
+tabPanel("Elemental Ratios",
+div(class="outer",
+
+
+fluidRow(
+sidebarLayout(
+
+sidebarPanel(
+
+
+
+
+uiOutput('inelementratioa'),
+uiOutput('inlineratioa'),
+
+uiOutput('inelementratiob'),
+uiOutput('inlineratiob'),
+
+uiOutput('inelementratioc'),
+uiOutput('inlineratioc'),
+
+uiOutput('inelementratiod'),
+uiOutput('inlineratiod'),
+
+tags$hr(),
+
+sliderInput("spotsize2", label = "Point Size", value=2, min=2, max=15),
+
+
+
+
+
+checkboxInput('elipseplot2', "Elipse"),
+
+
+
+tags$hr(),
+
+
+downloadButton('downloadPlot4', "Plot")
+
+
+
+),
+
+mainPanel(
+tabPanel('Element Ratios',
+div(
+style = "position:relative",
+plotOutput("elementratiotimeseries", height = 650,
+hover = hoverOpts("plot_hoverratio", delay = 100, delayType = "debounce")),
+uiOutput("hover_inforatio")
+)
+
+)
+
+))
+
+))
 
 
 )
