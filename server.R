@@ -432,7 +432,7 @@ outLines <- reactive({
 })
 
 output$inLines <- renderUI({
-    selectInput(inputId = "lines", label = h4("Fluorescence Line"), choices =  outLines())
+    selectInput(inputId = "lines", label=NULL, choices =  outLines())
 })
 
 
@@ -828,7 +828,7 @@ outLinesPCA_3p1 <- reactive({
 
 
 output$in3Line1 <- renderUI({
-    selectInput(inputId = "threeline1", label = h4("Fluorescence Line"), choices =  outLinesPCA_3p1())
+    selectInput(inputId = "threeline1", label=NULL, choices =  outLinesPCA_3p1())
 })
 
 output$in3Element2 <- renderUI({
@@ -853,7 +853,7 @@ outLinesPCA_3p2 <- reactive({
 })
 
 output$in3Line2 <- renderUI({
-    selectInput(inputId = "threeline2", label = h4("Fluorescence Line"), choices =  outLinesPCA_3p2())
+    selectInput(inputId = "threeline2", label=NULL, choices =  outLinesPCA_3p2())
 })
 
 output$in3Element3 <- renderUI({
@@ -877,7 +877,7 @@ outLinesPCA_3p3 <- reactive({
 })
 
 output$in3Line3 <- renderUI({
-    selectInput(inputId = "threeline3", label = h4("Fluorescence Line"), choices =  outLinesPCA_3p3())
+    selectInput(inputId = "threeline3", label=NULL, choices =  outLinesPCA_3p3())
 })
 
 
@@ -905,7 +905,7 @@ outLinesPCA_5p1 <- reactive({
 })
 
 output$in5Line1 <- renderUI({
-    selectInput(inputId = "fiveline1", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p1())
+    selectInput(inputId = "fiveline1", label=NULL, choices =  outLinesPCA_5p1())
 })
 
 output$in5Element2 <- renderUI({
@@ -930,7 +930,7 @@ outLinesPCA_5p2 <- reactive({
 
 
 output$in5Line2 <- renderUI({
-    selectInput(inputId = "fiveline2", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p2())
+    selectInput(inputId = "fiveline2", label=NULL, choices =  outLinesPCA_5p2())
 })
 
 output$in5Element3 <- renderUI({
@@ -955,7 +955,7 @@ outLinesPCA_5p3 <- reactive({
 
 
 output$in5Line3 <- renderUI({
-    selectInput(inputId = "fiveline3", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p3())
+    selectInput(inputId = "fiveline3", label=NULL, choices =  outLinesPCA_5p3())
 })
 
 output$in5Element4 <- renderUI({
@@ -979,7 +979,7 @@ outLinesPCA_5p4 <- reactive({
 })
 
 output$in5Line4 <- renderUI({
-    selectInput(inputId = "fiveline4", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p4())
+    selectInput(inputId = "fiveline4", label=NULL, choices =  outLinesPCA_5p4())
 })
 
 output$in5Element5 <- renderUI({
@@ -1005,7 +1005,7 @@ outLinesPCA_5p5 <- reactive({
 
 
 output$in5Line5 <- renderUI({
-    selectInput(inputId = "fiveline5", label = h4("Fluorescence Line"), choices =  outLinesPCA_5p5())
+    selectInput(inputId = "fiveline5", label=NULL, choices =  outLinesPCA_5p5())
 })
 
 
@@ -1098,7 +1098,7 @@ interpSplit3one <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.1 <- melt(fish.int.1$z, na.rm=TRUE)
     colnames(fish.int.melt.1) <- c("x", "y", "z")
     
@@ -1140,7 +1140,7 @@ interpSplit3two <- reactive({
     
     
     
-    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.2 <- melt(fish.int.2$z, na.rm=TRUE)
     colnames(fish.int.melt.2) <- c("x", "y", "z")
     
@@ -1179,7 +1179,7 @@ interpSplit3three <- reactive({
     
     
     
-    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.3 <- melt(fish.int.3$z, na.rm=TRUE)
     colnames(fish.int.melt.3) <- c("x", "y", "z")
     
@@ -1357,7 +1357,7 @@ ranges5 <- reactiveValues(x = NULL, y = NULL)
 
 interpSplit5one <- reactive({
     
-    fishImport <- myData()
+    fishImport <- xrfKReactive()
     
     #fishSubset1 <- fishImport %>% filter(Line==input$fiveline1 & Element==input$fiveelement1)
     fishSubset1 <- fishImport[,c("x", "y", paste0(input$fiveelement1, ".", input$fiveline1))]
@@ -1376,7 +1376,7 @@ interpSplit5one <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.1 <- melt(fish.int.1$z, na.rm=TRUE)
     colnames(fish.int.melt.1) <- c("x", "y", "z")
     
@@ -1420,7 +1420,7 @@ interpSplit5two <- reactive({
     
     
     
-    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.2 <- melt(fish.int.2$z, na.rm=TRUE)
     colnames(fish.int.melt.2) <- c("x", "y", "z")
     
@@ -1464,7 +1464,7 @@ interpSplit5three <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.3 <- melt(fish.int.3$z, na.rm=TRUE)
     colnames(fish.int.melt.3) <- c("x", "y", "z")
     
@@ -1508,7 +1508,7 @@ interpSplit5four <- reactive({
     y.ratio <- y.range/x.range
     
 
-    fish.int.4 <- with(fishSubset4, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.4 <- with(fishSubset4, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.4 <- melt(fish.int.4$z, na.rm=TRUE)
     colnames(fish.int.melt.4) <- c("x", "y", "z")
     
@@ -1552,7 +1552,7 @@ interpSplit5five <- reactive({
     
     
 
-    fish.int.5 <- with(fishSubset5, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolutionmulti, ny=input$resolutionmulti*y.ratio))
+    fish.int.5 <- with(fishSubset5, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
     fish.int.melt.5 <- melt(fish.int.5$z, na.rm=TRUE)
     colnames(fish.int.melt.5) <- c("x", "y", "z")
     

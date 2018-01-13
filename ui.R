@@ -178,7 +178,7 @@ sliderInput('thresh3hold3', label="Threshold", value=0.1, min=0, max=1),
 
 tags$hr(),
 
-sliderInput('resolutionmulti', label = "Interpolation Resolution", value=100, min=10, max=10000),
+sliderInput('resolution3', label = "Interpolation Resolution", value=100, min=10, max=10000),
 checkboxInput('scale3', label="Scale", value=FALSE),
 
 tags$hr(),
@@ -260,7 +260,7 @@ sliderInput('thresh5hold5', label="Threshold", value=0.1, min=0, max=1),
 
 tags$hr(),
 
-sliderInput("resolutionmulti", label = "Interpolation Resolution", value=100, min=10, max=10000),
+sliderInput('resolution5', label = "Interpolation Resolution", value=100, min=10, max=10000),
 checkboxInput('scale5', label="Scale", value=FALSE),
 
 
