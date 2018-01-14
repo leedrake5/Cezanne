@@ -42,7 +42,7 @@ tags$hr(),
 
 selectInput(
 "colorramp", "Color Ramp",
-c("Black and White" = "Black and White", "Terrain" = "terrain.colors(", "Rainbow" = "rainbow(", "Heat" = "heat.colors(", "Topo" = "topo.colors(", "CM" = "cm.colors("),
+c("Black and White" = "Black and White", "White and Black" = "White and Black", "Terrain" = "terrain.colors(", "Rainbow" = "rainbow(", "Heat" = "heat.colors(", "Topo" = "topo.colors(", "CM" = "cm.colors("),
 
 selected="Black and White"),
 
@@ -149,6 +149,7 @@ titlePanel("Three Element Plot"),
 sidebarLayout(
 sidebarPanel(
 
+
 actionButton("actionprocess3", label = "Plot"),
 
 uiOutput('in3Element1'),
@@ -177,8 +178,8 @@ sliderInput('thresh3hold3', label="Threshold", value=0.1, min=0, max=1),
 
 
 tags$hr(),
-
-sliderInput('resolution3', label = "Interpolation Resolution", value=100, min=10, max=10000),
+checkboxInput('default3', label="Default to Native Resolution", value=FALSE),
+uiOutput('inresolution3'),
 checkboxInput('scale3', label="Scale", value=FALSE),
 
 tags$hr(),
@@ -259,8 +260,9 @@ sliderInput('thresh5hold5', label="Threshold", value=0.1, min=0, max=1),
 
 
 tags$hr(),
+checkboxInput('default5', label="Default to Native Resolution", value=FALSE),
+uiOutput('inresolution5'),
 
-sliderInput('resolution5', label = "Interpolation Resolution", value=100, min=10, max=10000),
 checkboxInput('scale5', label="Scale", value=FALSE),
 
 

@@ -582,6 +582,8 @@ singlePlotType <- reactive({
         "ColorRamp"
     } else if (input$colorramp=="Black and White"){
         "BW"
+    } else if (input$colorramp=="White and Black"){
+        "WB"
     }
     
     
@@ -624,14 +626,27 @@ plotInputSingle <- reactive({
     scale_y_continuous("Y (mm)") +
     theme_classic()
     
+    wb.plot <- ggplot(fish) +
+    geom_tile(aes(x, y,  fill=z, alpha=altz)) +
+    #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
+    scale_fill_gradient("Net Counts", low="black", high="white", na.value = "black") +
+    scale_alpha_continuous("Net Counts", range=c(0, 1)) +
+    coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
+    guides(alpha=FALSE) +
+    scale_x_continuous("X (mm)") +
+    scale_y_continuous("Y (mm)") +
+    theme_classic()
+    
     
     
     
     
     if(singlePlotType()=="ColorRamp"){
         colorramp.plot
-    } else  if(singlePlotType()=="BW"){
+    } else if(singlePlotType()=="BW"){
         bw.plot
+    } else if(singlePlotType()=="WB"){
+        wb.plot
     }
     
     
@@ -1074,8 +1089,23 @@ output$xrfpcaplot <- renderPlot({
     
 })
 
+xLength3 <- reactive({
+    
+    if(input$default3==TRUE){
+        length(unique(myData()$x))
+    } else {
+        as.numeric("100")
+    }
+    
+})
 
 
+output$inresolution3 <- renderUI({
+    
+    sliderInput("resolution3", label = "Interpolation Resolution", value=xLength3(), min=10, max=10000)
+
+    
+})
 
 interpSplit3one <- reactive({
     
@@ -1098,7 +1128,7 @@ interpSplit3one <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolutionmulti*y.ratio))
+    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolution3*y.ratio))
     fish.int.melt.1 <- melt(fish.int.1$z, na.rm=TRUE)
     colnames(fish.int.melt.1) <- c("x", "y", "z")
     
@@ -1140,7 +1170,7 @@ interpSplit3two <- reactive({
     
     
     
-    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolutionmulti*y.ratio))
+    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolution3*y.ratio))
     fish.int.melt.2 <- melt(fish.int.2$z, na.rm=TRUE)
     colnames(fish.int.melt.2) <- c("x", "y", "z")
     
@@ -1179,7 +1209,7 @@ interpSplit3three <- reactive({
     
     
     
-    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolutionmulti*y.ratio))
+    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution3, ny=input$resolution3*y.ratio))
     fish.int.melt.3 <- melt(fish.int.3$z, na.rm=TRUE)
     colnames(fish.int.melt.3) <- c("x", "y", "z")
     
@@ -1352,6 +1382,26 @@ observeEvent(input$plot_3_dblclick, {
 
 
 
+
+xLength5 <- reactive({
+    
+    if(input$default5==TRUE){
+        length(unique(xrfKReactive()$x))
+    } else {
+        as.numeric("100")
+    }
+    
+})
+
+
+output$inresolution5 <- renderUI({
+    
+    sliderInput("resolution5", label = "Interpolation Resolution", value=xLength5(), min=10, max=10000)
+    
+    
+})
+
+
 ranges5 <- reactiveValues(x = NULL, y = NULL)
 
 
@@ -1376,7 +1426,7 @@ interpSplit5one <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
+    fish.int.1 <- with(fishSubset1, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolution5*y.ratio))
     fish.int.melt.1 <- melt(fish.int.1$z, na.rm=TRUE)
     colnames(fish.int.melt.1) <- c("x", "y", "z")
     
@@ -1420,7 +1470,7 @@ interpSplit5two <- reactive({
     
     
     
-    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
+    fish.int.2 <- with(fishSubset2, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolution5*y.ratio))
     fish.int.melt.2 <- melt(fish.int.2$z, na.rm=TRUE)
     colnames(fish.int.melt.2) <- c("x", "y", "z")
     
@@ -1464,7 +1514,7 @@ interpSplit5three <- reactive({
     y.ratio <- y.range/x.range
     
     
-    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
+    fish.int.3 <- with(fishSubset3, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolution5*y.ratio))
     fish.int.melt.3 <- melt(fish.int.3$z, na.rm=TRUE)
     colnames(fish.int.melt.3) <- c("x", "y", "z")
     
@@ -1508,7 +1558,7 @@ interpSplit5four <- reactive({
     y.ratio <- y.range/x.range
     
 
-    fish.int.4 <- with(fishSubset4, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
+    fish.int.4 <- with(fishSubset4, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolution5*y.ratio))
     fish.int.melt.4 <- melt(fish.int.4$z, na.rm=TRUE)
     colnames(fish.int.melt.4) <- c("x", "y", "z")
     
@@ -1552,7 +1602,7 @@ interpSplit5five <- reactive({
     
     
 
-    fish.int.5 <- with(fishSubset5, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolutionmulti*y.ratio))
+    fish.int.5 <- with(fishSubset5, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution5, ny=input$resolution5*y.ratio))
     fish.int.melt.5 <- melt(fish.int.5$z, na.rm=TRUE)
     colnames(fish.int.melt.5) <- c("x", "y", "z")
     
