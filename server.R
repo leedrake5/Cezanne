@@ -483,6 +483,24 @@ myData <- reactive({
 
 #####Single Element Map
 
+xLength1 <- reactive({
+    
+    if(input$default1==TRUE){
+        length(unique(myData()$x))
+    } else {
+        as.numeric("100")
+    }
+    
+})
+
+
+output$inresolution1 <- renderUI({
+    
+    sliderInput("resolution1", label = "Interpolation Resolution", value=xLength1(), min=10, max=10000)
+    
+    
+})
+
 
 interpSinglePrep <- reactive({
     
@@ -504,7 +522,7 @@ interpSinglePrep <- reactive({
     
     y.ratio <- y.range/x.range
     
-    fish.int <- with(fishSubset, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution, ny=input$resolution*y.ratio))
+    fish.int <- with(fishSubset, interp(x=x, y=y, z=Net, duplicate="user", dupfun="mean", nx=input$resolution1, ny=input$resolution1*y.ratio))
     fish.int.melt <- melt(fish.int$z, na.rm=TRUE)
     colnames(fish.int.melt) <- c("x", "y", "z")
     
@@ -545,11 +563,8 @@ normSinglePrep <- reactive({
 
 plotSinglePrep <- reactive({
     
-    fish <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSinglePrep()
-    }
+    fish <- interpSinglePrep()
+    
     
     fish <- subset(fish, altz > input$threshhold)
     
@@ -598,11 +613,8 @@ plotInputSingle <- reactive({
         as.character(paste("terrain.colors(", input$colorrampvalues, ")", sep="", collapse=""))
     }
     
-    fish <- if(input$useinterp==TRUE){
-        plotSinglePrep()
-    } else if(input$useinterp==FALSE){
-        normSinglePrep()
-    }
+    fish <-  plotSinglePrep()
+  
     
     colorramp.plot <- ggplot(fish) +
     geom_tile(aes(x, y,  fill=z, alpha=altz)) +
@@ -1234,23 +1246,12 @@ ranges3 <- reactiveValues(x = NULL, y = NULL)
 
 dataSplit3 <- reactive({
     
-    fish.int.melt.1 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit3one()
-    }
+    fish.int.melt.1 <- interpSplit3one()
     
-    fish.int.melt.2 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit3two()
-    }
     
-    fish.int.melt.3 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit3three()
-    }
+    fish.int.melt.2 <- interpSplit3two()
+    
+    fish.int.melt.3 <- interpSplit3three()
     
     
     fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh3hold1)
@@ -1624,35 +1625,15 @@ interpSplit5five <- reactive({
 
 dataSplit5 <- reactive({
     
-    fish.int.melt.1 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit5one()
-    }
+    fish.int.melt.1 <- interpSplit5one()
     
-    fish.int.melt.2 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit5two()
-    }
+    fish.int.melt.2 <- interpSplit5two()
     
-    fish.int.melt.3 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit5three()
-    }
+    fish.int.melt.3 <- interpSplit5three()
     
-    fish.int.melt.4 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit5four()
-    }
+    fish.int.melt.4 <- interpSplit5four()
     
-    fish.int.melt.5 <- if(input$useinterp==FALSE){
-        normSinglePrep()
-    } else if(input$useinterp==TRUE){
-        interpSplit5five()
-    }
+    fish.int.melt.5 <- interpSplit5five()
     
     
     fish.int.melt.1 <- subset(fish.int.melt.1, fish.int.melt.1$altz > input$thresh5hold1)

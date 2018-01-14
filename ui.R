@@ -54,8 +54,8 @@ sliderInput('threshhold', label="Threshold", value=0.1, min=0, max=1),
 
 tags$hr(),
 
-checkboxInput("useinterp", label="Interpolation", value=TRUE),
-sliderInput("resolution", label = "Interpolation Resolution", value=100, min=10, max=10000),
+checkboxInput('default1', label="Default to Native Resolution", value=FALSE),
+uiOutput('inresolution1'),
 downloadButton(outputId="downloadnorm", label="normTable"),
 
 
