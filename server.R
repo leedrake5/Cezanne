@@ -486,7 +486,7 @@ myData <- reactive({
 xLength1 <- reactive({
     
     if(input$default1==TRUE){
-        length(unique(myData()$x))
+        length(unique(myData()$x))/length(unique(myData()$y))
     } else {
         as.numeric("100")
     }
@@ -1104,7 +1104,7 @@ output$xrfpcaplot <- renderPlot({
 xLength3 <- reactive({
     
     if(input$default3==TRUE){
-        length(unique(myData()$x))
+        length(unique(xrfKReactive()$x))/length(unique(xrfKReactive()$y))
     } else {
         as.numeric("100")
     }
@@ -1387,7 +1387,7 @@ observeEvent(input$plot_3_dblclick, {
 xLength5 <- reactive({
     
     if(input$default5==TRUE){
-        length(unique(xrfKReactive()$x))
+        length(unique(xrfKReactive()$x))/length(unique(xrfKReactive()$y))
     } else {
         as.numeric("100")
     }
