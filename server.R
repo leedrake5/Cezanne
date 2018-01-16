@@ -215,25 +215,28 @@ fullInputValCounts <- reactive({
     
     
     
-    all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
-    merge.label <- paste(val.data$Element, val.data$Line, sep=".")
-    merge.coord <- paste(val.data$x, val.data$y, sep="-")
+    #all.col.names <- c( "Element", "Line", "Net", "Background", "x", "y")
+    #merge.label <- paste(val.data$Element, val.data$Line, sep=".")
+    #merge.coord <- paste(val.data$x, val.data$y, sep="-")
     
-    simple.val.frame <- data.frame(merge.coord, merge.label, val.data$Net)
-    colnames(simple.val.frame) <- c("Spectrum", "Element", "Net")
+    #simple.val.frame <- data.frame(merge.coord, merge.label, val.data$Net)
+    #colnames(simple.val.frame) <- c("Spectrum", "Element", "Net")
     
-    rh.vals <- subset(simple.val.frame$Net, simple.val.frame$Element==input$rhscale)
-   
+    #rh.vals <- subset(simple.val.frame$Net, simple.val.frame$Element==input$rhscale)
     
-    norm.val <- rh.vals/mean(calFileContents()$Spectra[,input$rhscale])*input$scalefactor
+    #norm.val <- rh.vals/mean(calFileContents()$Spectra[,input$rhscale])*input$scalefactor
+    norm.val <- val.data[,input$rhscale]/mean(calFileContents()$Spectra[,input$rhscale])*input$scalefactor
     
-    norm.val.frame <- data.frame(merge.coord, merge.label, simple.val.frame$Net/norm.val)
-    colnames(norm.val.frame) <- c("Spectrum", "Element", "Net")
+    #norm.val.frame <- data.frame(merge.coord, merge.label, simple.val.frame$Net/norm.val)
+    #colnames(norm.val.frame) <- c("Spectrum", "Element", "Net")
 
     
-    val.line.table <- dcast(data=norm.val.frame, formula=Spectrum ~ Element,  fun.aggregate=mean, drop=FALSE)
+    #val.line.table <- dcast(data=norm.val.frame, formula=Spectrum ~ Element,  fun.aggregate=mean, drop=FALSE)
 
-    val.line.table[complete.cases(val.line.table),]
+    #val.line.table[complete.cases(val.line.table),]
+    val.line.data <- val.data[,3:length(val.data)]/norm.val
+    final.frame <- data.frame(val.data[,1:2], val.line.data)
+    final.frame
 })
 
 
@@ -251,6 +254,7 @@ tableInputValQuant <- reactive({
     elements <- elements.cal[!is.na(match(elements.cal, ls(count.table)))]
     variables <- calVariableElements()
     valdata <- myDataHold()
+    
     
     core.n <- detectCores()-2
 
@@ -332,32 +336,19 @@ tableInputValQuant <- reactive({
     }, cl=6L
     )
     
-    predicted.vector <- as.numeric(as.vector(unlist(predicted.list)))
+    predicted.vector <- unlist(predicted.list)
     
-    dim(predicted.vector) <- c(length(count.table$Spectrum), length(elements))
+    dim(predicted.vector) <- c(length(count.table[,1]), length(elements))
     
-    predicted.frame <- data.frame(count.table$Spectrum, predicted.vector)
+    predicted.frame <- data.frame(count.table[,1:2], predicted.vector)
     
-    colnames(predicted.frame) <- c("Spectrum", elements)
+    colnames(predicted.frame) <- c("x", "y", elements)
     
-    melt.frame <- melt(predicted.frame, id="Spectrum")
-    
-    colnames(melt.frame) <- c("Spectrum", "Element", "CPS")
-    
-    
-    x <- as.numeric(gsub("[-][\\s\\S]*$", "", melt.frame$Spectrum, perl=T))
-    y <- as.numeric(sub('.*\\-', '', melt.frame$Spectrum))
-
-    
-    element.char <- gsub("[.][\\s\\S]*$", "", melt.frame$Element, perl=T)
-    line.char <- sub('.*\\.', '', melt.frame$Element)
-    
-    reform.table <- data.frame(element.char, line.char, melt.frame$CPS, x, y)
-    colnames(reform.table) <- c( "Element", "Line", "Net", "x", "y")
-
-    reform.table
+    #predicted.data.table <- data.table(predicted.frame)
     #predicted.values <- t(predicted.values)
     
+    #predicted.data.table
+    predicted.frame
     
 })
 
