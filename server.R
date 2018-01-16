@@ -595,11 +595,34 @@ singlePlotType <- reactive({
     
 })
 
+
+colorTranslator <- reactive({
+    
+    if(input$colorramp=="Terrain"){
+        "terrain.colors("
+    } else if(input$colorramp=="Rainbow"){
+        "rainbow("
+    } else if(input$colorramp=="Heat"){
+        "heat.colors("
+    } else if(input$colorramp=="Topo"){
+        "topo.colors("
+    } else if(input$colorramp=="CM"){
+        "cm.colors("
+    } else if (input$colorramp=="Black and White"){
+        "Black and White"
+    } else if (input$colorramp=="White and Black"){
+        "White and Black"
+    }
+    
+    
+})
+
+
 plotInputSingle <- reactive({
     
     
     colvals <- if(singlePlotType()=="ColorRamp"){
-        as.character(paste(input$colorramp, input$colorrampvalues, ")", sep="", collapse=""))
+        as.character(paste(colorTranslator(), input$colorrampvalues, ")", sep="", collapse=""))
     } else {
         as.character(paste("terrain.colors(", input$colorrampvalues, ")", sep="", collapse=""))
     }

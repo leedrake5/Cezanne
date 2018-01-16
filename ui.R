@@ -42,7 +42,7 @@ tags$hr(),
 
 selectInput(
 "colorramp", "Color Ramp",
-c("Black and White" = "Black and White", "White and Black" = "White and Black", "Terrain" = "terrain.colors(", "Rainbow" = "rainbow(", "Heat" = "heat.colors(", "Topo" = "topo.colors(", "CM" = "cm.colors("),
+c("Black and White", "White and Black", "Terrain", "Rainbow", "Heat", "Topo", "CM"),
 
 selected="Black and White"),
 
