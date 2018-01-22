@@ -18,7 +18,7 @@ fileInput('file1', 'Choose file to upload',
 accept = c('.csv'), multiple=TRUE
 ),
 
-radioButtons('filetype', "File Type", choices=c("Excel", "Net", "Sheet"), selected="Excel"),
+selectInput('filetype', "File Type", choices=c("Excel", "Net"), selected="Excel"),
 numericInput('adjust', "Adjust",  value=0),
 
 tags$hr(),
