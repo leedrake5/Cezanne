@@ -460,6 +460,9 @@ myData <- reactive({
     
     results.final
     
+    results.final[results.final<0] <- 0
+    results.final <- results.final[complete.cases(results.final),]
+    results.final
     
     
 })
@@ -795,8 +798,9 @@ xrfKReactive <- reactive({
     
     spectra.line.table <- myData()
     
+    
     xrf.pca.frame <- spectra.line.table[,input$show_vars]
-    xrf.pca.frame <- xrf.pca.frame[complete.cases(xrf.pca.frame),]
+    #xrf.pca.frame <- xrf.pca.frame[complete.cases(xrf.pca.frame),]
     
     
     
