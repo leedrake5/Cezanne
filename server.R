@@ -132,6 +132,26 @@ shinyServer(function(input, output) {
         
     })
     
+    
+    
+    CombinedData <- reactive({
+        
+        inFile <- input$file1
+        
+        #if (is.null(inFile)) {return(NULL)}
+        
+        
+        
+        proto.fish <- loadWorkbook(file=inFile$datapath)
+        just.fish <- readWorkbook(proto.fish, sheet=1)
+     
+        
+        just.fish
+        
+        
+        
+    })
+    
    
     
     
@@ -140,13 +160,19 @@ shinyServer(function(input, output) {
         
         myDataHold <- reactive({
             
-            if(input$filetype=="Net"){
+            data <- if(input$filetype=="Net"){
                 netCounts()
-            } else if(input$filetype=="Sheet"){
-                sheetData()
+            } else if(input$filetype=="Combined"){
+                CombinedData()
             } else if(input$filetype=="Excel"){
                 ExcelData()
             }
+            
+            if(input$flip==TRUE){
+                colnames(data) <- c("y", "x", colnames(data)[3:length(data)])
+            }
+            
+            data
             
         })
         

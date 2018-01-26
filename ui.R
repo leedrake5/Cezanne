@@ -18,7 +18,7 @@ fileInput('file1', 'Choose file to upload',
 accept = c('.csv'), multiple=TRUE
 ),
 
-selectInput('filetype', "File Type", choices=c("Excel", "Net"), selected="Excel"),
+selectInput('filetype', "File Type", choices=c("Excel", "Combined", "Net"), selected="Excel"),
 numericInput('adjust', "Adjust",  value=0),
 
 tags$hr(),
@@ -57,6 +57,8 @@ tags$hr(),
 checkboxInput('default1', label="Default to Native Resolution", value=FALSE),
 uiOutput('inresolution1'),
 downloadButton(outputId="downloadnorm", label="normTable"),
+checkboxInput('flip', label="Flip", value=FALSE),
+
 
 
 tags$hr(),
