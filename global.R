@@ -238,7 +238,7 @@ is.0 <- function(cps, file) {
 
 
 
-
+strReverse <- function(x) as.numeric(sapply(lapply(strsplit(x, NULL), rev), paste, collapse=""))
 
 
 

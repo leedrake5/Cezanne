@@ -168,8 +168,15 @@ shinyServer(function(input, output) {
                 ExcelData()
             }
             
-            if(input$flip==TRUE){
+            if(input$rotate==TRUE){
                 colnames(data) <- c("y", "x", colnames(data)[3:length(data)])
+            }
+            
+            if(input$flip==TRUE){
+                data <- data[order(data$y),]
+                data$y <- rev(data$y)
+                
+
             }
             
             data

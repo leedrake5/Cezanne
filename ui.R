@@ -57,7 +57,9 @@ tags$hr(),
 checkboxInput('default1', label="Default to Native Resolution", value=FALSE),
 uiOutput('inresolution1'),
 downloadButton(outputId="downloadnorm", label="normTable"),
+checkboxInput('rotate', label="Rotate", value=FALSE),
 checkboxInput('flip', label="Flip", value=FALSE),
+
 
 
 
