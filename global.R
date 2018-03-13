@@ -129,6 +129,9 @@ read_csv_net <- function(filepath) {
     
 }
 
+
+
+
 add_x <- function(netcounts, x) {
     
     netcounts$x <- x

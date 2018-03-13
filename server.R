@@ -132,6 +132,19 @@ shinyServer(function(input, output) {
         
     })
     
+    DatData <- reactive({
+        
+        inFile <- input$file1
+        
+        #if (is.null(inFile)) {return(NULL)}
+        
+        read.csv(file=inFile$datapath)
+        
+        
+        
+        
+    })
+    
     
     
     CombinedData <- reactive({
@@ -166,6 +179,8 @@ shinyServer(function(input, output) {
                 CombinedData()
             } else if(input$filetype=="Excel"){
                 ExcelData()
+            } else if(input$filetype==".dat"){
+                DatData()
             }
             
             if(input$rotate==TRUE){

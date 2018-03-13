@@ -15,10 +15,10 @@ actionButton("actionprocess1", label = "Plot"),
 tags$hr(),
 
 fileInput('file1', 'Choose file to upload',
-accept = c('.csv'), multiple=TRUE
+accept = c('.csv', '.xls', '.xlsx', '.dat'), multiple=TRUE
 ),
 
-selectInput('filetype', "File Type", choices=c("Excel", "Combined", "Net"), selected="Excel"),
+selectInput('filetype', "File Type", choices=c("Excel", ".dat", "Combined", "Net"), selected="Excel"),
 numericInput('adjust', "Adjust",  value=0),
 
 tags$hr(),
