@@ -84,7 +84,7 @@ uiOutput("hover_infosimp")))
 
 
 
-tabPanel("PCA",
+tabPanel("Analytics",
 div(class="outer",
 
 
@@ -138,7 +138,20 @@ uiOutput("hover_infopca")
 
 
 ),
-tabPanel("Table", DT::dataTableOutput('xrfpcatable'))
+
+tabPanel("Optimal Clusters",
+div(
+style = "position:relative",
+plotOutput('optimalkplot',
+hover = hoverOpts("plot_hoveroptimalk", delay = 100, delayType = "debounce")),
+uiOutput("hover_infooptimalk"))
+),
+
+tabPanel('Covariance', plotOutput('covarianceplotvalues')),
+
+
+
+tabPanel("PCA Table", DT::dataTableOutput('xrfpcatable'))
 
 
 ))
