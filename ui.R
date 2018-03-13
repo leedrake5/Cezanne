@@ -50,7 +50,7 @@ sliderInput("colorrampvalues", label = "Steps", value=15, min=2, max=30),
 
 tags$hr(),
 
-sliderInput('threshhold', label="Threshold", value=0.1, min=0, max=1),
+sliderInput('threshhold', label="Threshold", value=0, min=0, max=1),
 
 tags$hr(),
 
