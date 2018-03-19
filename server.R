@@ -680,14 +680,20 @@ plotInputSingle <- reactive({
         as.character(paste("terrain.colors(", input$colorrampvalues, ")", sep="", collapse=""))
     }
     
+    legend.name <- if(input$usecalfile==TRUE){
+        paste0(input$elements, " ", "%")
+    } else if(input$usecalfile==FALSE){
+        paste0(input$elements, " Net Counts")
+    }
+    
     fish <-  plotSinglePrep()
   
     
     colorramp.plot <- ggplot(fish) +
     geom_tile(aes(x, y,  fill=z, alpha=altz)) +
     #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-    scale_fill_gradientn("Net Counts", colours=eval(parse(text=paste(colvals))), na.value = "white") +
-    scale_alpha_continuous("Net Counts", range=c(0, 1)) +
+    scale_fill_gradientn(legend.name, colours=eval(parse(text=paste(colvals))), na.value = "white") +
+    scale_alpha_continuous(legend.name, range=c(0, 1)) +
     coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
     guides(alpha=FALSE) +
     scale_x_continuous("X (mm)") +
@@ -697,7 +703,7 @@ plotInputSingle <- reactive({
     wb.plot <- ggplot(fish) +
     geom_tile(aes(x, y,  fill=z)) +
     #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-    scale_fill_gradient("Net Counts", low="white", high="black", na.value = "white") +
+    scale_fill_gradient(legend.name, low="white", high="black", na.value = "white") +
     #scale_alpha_continuous("Net Counts", range=c(0, 1)) +
     coord_equal(xlim = ranges1$x, ylim = ranges1$y, expand = FALSE) +
     guides(alpha=FALSE) +
@@ -708,7 +714,7 @@ plotInputSingle <- reactive({
     bw.plot <- ggplot(fish) +
     geom_tile(aes(x, y,  fill=z)) +
     #scale_colour_gradientn("Net Counts", colours=eval(parse(text=paste(colvals)))) +
-    scale_fill_gradient("Net Counts", low="black", high="white", na.value = "black") +
+    scale_fill_gradient(legend.name, low="black", high="white", na.value = "black") +
     #scale_fill_distiller(palette="Greys") +
     #scale_colour_gradient("Net Counts", low="black", high="white", na.value = "black") +
     #scale_alpha_continuous("Net Counts", range=c(0, 1)) +
