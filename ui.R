@@ -92,7 +92,7 @@ fluidRow(
 sidebarLayout(
 
 sidebarPanel(
-numericInput("knum", label = "K-Means", value=3),
+uiOutput('knumui'),
 
 uiOutput('defaultlines'),
 

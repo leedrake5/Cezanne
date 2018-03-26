@@ -905,23 +905,52 @@ outElementsPCA <- reactive({
 
 
 
+
 ###Optimal Clusters
 
 optimalK <- reactive({
     
-    iter <- input$knum*2
     
     spectra.line.table <- myData()
+    
     xrf.pca.frame <- spectra.line.table[,input$show_vars]
     xrf.pca.frame <- xrf.pca.frame[complete.cases(xrf.pca.frame),]
     
     wss <- (nrow(xrf.pca.frame)-1)*sum(apply(xrf.pca.frame,2,var))
-    for (i in 2:length(xrf.pca.frame)) wss[i] <- sum(kmeans(xrf.pca.frame,
+    for (i in 2:30) wss[i] <- sum(kmeans(xrf.pca.frame,
     centers=i)$withinss)
     
     data.frame(
-    clustercount=seq(1, length(xrf.pca.frame), 1),
+    clustercount=seq(1, 30, 1),
     wss=wss)
+    
+})
+
+
+output$wsstable <- downloadHandler(
+filename = function() { paste(paste(c(input$projectname, "_", "WSSTable"), collapse=''), '.csv', sep=',') },
+content = function(file
+) {
+    write.csv(optimalK(), file)
+}
+)
+
+
+
+
+screeCrunch <- reactive({
+    
+    wss.frame <- optimalK()
+    
+    best.choice <- scree_crunch(dataframe=wss.frame, dependent="wss", independent="clustercount")
+    
+    best.choice
+    
+})
+
+output$knumui <- renderUI({
+    
+    numericInput("knum", label = "K-Means", value=screeCrunch())
     
 })
 
@@ -934,6 +963,8 @@ optimalKplot <- reactive({
     ggplot(wss.frame, aes(clustercount, wss)) +
     geom_line() +
     geom_point() +
+    geom_point(data=wss.frame[screeCrunch(), ], aes(clustercount, wss), size=3) +
+    geom_point(data=wss.frame[screeCrunch(), ], aes(clustercount, wss), pch=1, size=6) +
     scale_x_continuous("Number of Clusters") +
     scale_y_continuous("Within Groups Sum of Squares", labels=comma) +
     theme_light()
@@ -945,15 +976,6 @@ optimalKplot <- reactive({
 
 output$optimalkplot <- renderPlot({
     optimalKplot()
-    
-})
-
-
-output$covarianceplotvalues <- renderPlot({
-    
-    data.table <- myData()
-    correlations <- cor(data.table[,3:length(data.table)], use="pairwise.complete.obs")
-    corrplot(correlations, method="circle")
     
 })
 
@@ -995,6 +1017,14 @@ output$hover_infooptimalk <- renderUI({
     
     )))
     )
+})
+
+output$covarianceplotvalues <- renderPlot({
+    
+    data.table <-  myData()
+    correlations <- cor(data.table[,2:length(data.table)], use="pairwise.complete.obs")
+    corrplot(correlations, method="circle")
+    
 })
 
 
