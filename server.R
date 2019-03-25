@@ -23,7 +23,7 @@ library(parallel)
 library(stringi)
 
 
-options(shiny.maxRequestSize=9000000*1024^2)
+options(shiny.maxRequestSize=9000000*1024^40)
 
 options(warn=-1)
 assign("last.warning", NULL, envir = baseenv())
@@ -111,7 +111,7 @@ shinyServer(function(input, output) {
         
     })
     
-    ExcelData <- reactive({
+    ArtaxExcelData <- reactive({
         
         inFile <- input$file1
         
@@ -133,6 +133,28 @@ shinyServer(function(input, output) {
         
     })
     
+    ExcelData <- reactive({
+        
+        inFile <- input$file1
+        
+        #if (is.null(inFile)) {return(NULL)}
+        
+        
+        
+        proto.fish <- loadWorkbook(file=inFile$datapath)
+        just.fish <- readWorkbook(proto.fish, sheet=1)
+        new.fish <- just.fish[,-1]
+        new.fish$x <- sapply(just.fish[,1], read_csv_x)
+        new.fish$y <- sapply(just.fish[,1], read_csv_y)
+        
+        final.fish <- new.fish[,c("x", "y", names(just.fish[,-1]))]
+        
+        final.fish
+        
+        
+        
+    })
+    
     DatData <- reactive({
         
         inFile <- input$file1
@@ -142,6 +164,23 @@ shinyServer(function(input, output) {
         read.csv(file=inFile$datapath)
         
         
+        
+        
+    })
+    
+    
+    XGDatData <- reactive({
+        
+        inFile <- input$file1
+        
+        #if (is.null(inFile)) {return(NULL)}
+        
+        file <- read.csv(file=inFile$datapath)
+        
+        colnames(file)[1] <- "y"
+        colnames(file)[2] <- "x"
+        
+        file
         
         
     })
@@ -178,10 +217,14 @@ shinyServer(function(input, output) {
                 netCounts()
             } else if(input$filetype=="Combined"){
                 CombinedData()
-            } else if(input$filetype=="Excel"){
+            } else if(input$filetype=="Artax Excel"){
+                ArtaxExcelData()
+            } else if(input$filetype=="Spreadsheet"){
                 ExcelData()
             } else if(input$filetype==".dat"){
                 DatData()
+            } else if(input$filetype=="XG Labs"){
+                XGDatData()
             }
             
             if(input$rotate==TRUE){
@@ -836,7 +879,7 @@ defaultLines <- reactive({
     
     element.names <- colnames(spectra.line.table[,3:length(spectra.line.table)])
     
-    element.names[1:3]
+    element.names
     
 })
 
@@ -2156,31 +2199,30 @@ hoverHoldRatio <- reactive({
     
     
     
-    first.ratio <- spectra.line.table[paste0(input$elementratioa, ".", input$lineratioa)]
+    first.ratio <- spectra.line.table[,paste0(input$elementratioa, ".", input$lineratioa)]
 
         
         
     second.ratio <- if(input$elementratiob!="None") {
-            spectra.line.table[paste0(input$elementratiob, ".", input$lineratiob)]
+            spectra.line.table[,paste0(input$elementratiob, ".", input$lineratiob)]
         }else{
-            spectra.line.table["None"]
+            spectra.line.table[,"None"]
         }
         
-    third.ratio <- spectra.line.table[paste0(input$elementratioc, ".", input$lineratioc)]
+    third.ratio <- spectra.line.table[,paste0(input$elementratioc, ".", input$lineratioc)]
 
         
     fourth.ratio <- if(input$elementratiod!="None") {
-            spectra.line.table[paste0(input$elementratiod, ".", input$lineratiod)]
+            spectra.line.table[,paste0(input$elementratiod, ".", input$lineratiod)]
         }else{
-            spectra.line.table["None"]
+            spectra.line.table[,"None"]
         }
         
 
 
     
     
-    ratio.frame <- data.frame(first.ratio, second.ratio, third.ratio, fourth.ratio, spectra.line.table$Cluster, spectra.line.table$x, spectra.line.table$y)
-    colnames(ratio.frame) <- gsub("[.]", "", c(substr(input$elementratioa, 1, 2), substr(input$elementratiob, 1, 2), substr(input$elementratioc, 1, 2), substr(input$elementratiod, 1, 2), "Cluster", "x", "y"))
+    ratio.frame <- data.frame(A=first.ratio, B=second.ratio, C=third.ratio, D=fourth.ratio, Cluster=spectra.line.table$Cluster, x=spectra.line.table$x, y=spectra.line.table$y)
     
     
     
@@ -2202,24 +2244,35 @@ hoverHoldRatio <- reactive({
     
 })
 
+output$notworking <- renderDataTable({
+    
+    hoverHoldRatio()
+    
+})
+
 
 
 plotInput4 <- reactive({
+    
     ratio.frame <- hoverHoldRatio()
+    ratio.frame$Cluster <- as.factor(ratio.frame$Cluster)
     
-    if(input$elementratiob!="None"){ratio.names.x <- c(names(ratio.frame[1]), "/", names(ratio.frame[2]))}
-    if(input$elementratiod!="None"){ratio.names.y <- c(names(ratio.frame[3]), "/", names(ratio.frame[4]))}
     
-    if(input$elementratiob=="None"){ratio.names.x <- c(names(ratio.frame[1]))}
-    if(input$elementratiod=="None"){ratio.names.y <- c(names(ratio.frame[3]))}
+    if(input$elementratiob!="None"){ratio.names.x <- c(input$elementratioa, "/", input$elementratiob)}
+    if(input$elementratiod!="None"){ratio.names.y <- c(input$elementratioc, "/", input$elementratiod)}
+    
+    if(input$elementratiob=="None"){ratio.names.x <- c(input$elementratioa)}
+    if(input$elementratiod=="None"){ratio.names.y <- c(input$elementratioc)}
     
     ratio.names.x <- paste(ratio.names.x, sep=",", collapse="")
     ratio.names.y <- paste(ratio.names.y, sep=",", collapse="")
     
     
-    cluster.ratio.plot <- qplot(W, Z, data=ratio.frame, xlab = ratio.names.x, ylab = ratio.names.y ) +
-    geom_point(aes(colour=as.factor(ratio.frame$Cluster), shape=as.factor(ratio.frame$Cluster)), size=input$spotsize2+1) +
-    geom_point(colour="grey30", size=input$spotsize2-2) +
+    cluster.ratio.plot <- ggplot(ratio.frame) +
+    scale_x_continuous(ratio.names.x) +
+    scale_y_continuous(ratio.names.y) +
+    geom_point(aes(x=W, y=Z, colour=as.factor(Cluster), shape=as.factor(Cluster)), size=input$spotsize2+1) +
+    geom_point(aes(x=W, y=Z), colour="grey30", size=input$spotsize2-2) +
     scale_shape_manual("Cluster", values=1:nlevels(as.factor(as.factor(ratio.frame$Cluster)))) +
     scale_colour_discrete("Cluster") +
     theme_light() +
@@ -2230,12 +2283,14 @@ plotInput4 <- reactive({
     theme(plot.title=element_text(size=20)) +
     theme(legend.title=element_text(size=15)) +
     theme(legend.text=element_text(size=15)) +
-    geom_point(colour="grey30", size=input$spotsize2-2, alpha=0.01)
+    geom_point(aes(x=W, y=Z), colour="grey30", size=input$spotsize2-2, alpha=0.01)
     
-    cluster.ratio.ellipse.plot <- qplot(W, Z, data=ratio.frame, xlab = ratio.names.x, ylab = ratio.names.y ) +
-    stat_ellipse(aes(ratio.frame$W, ratio.frame$Z, colour=as.factor(ratio.frame$Cluster))) +
-    geom_point(aes(colour=as.factor(ratio.frame$Cluster), shape=as.factor(ratio.frame$Cluster)), size=input$spotsize2+1) +
-    geom_point(colour="grey30", size=input$spotsize2-2) +
+    cluster.ratio.ellipse.plot <- ggplot(ratio.frame) +
+    scale_x_continuous(ratio.names.x) +
+    scale_y_continuous(ratio.names.y) +
+    stat_ellipse(aes(x=W, y=Z, colour=as.factor(Cluster))) +
+    geom_point(aes(x=W, y=Z, colour=as.factor(Cluster), shape=as.factor(Cluster)), size=input$spotsize2+1) +
+    geom_point(aes(x=W, y=Z), colour="grey30", size=input$spotsize2-2) +
     scale_shape_manual("Cluster", values=1:nlevels(as.factor(as.factor(ratio.frame$Cluster)))) +
     scale_colour_discrete("Cluster") +
     theme_light() +
@@ -2246,7 +2301,7 @@ plotInput4 <- reactive({
     theme(plot.title=element_text(size=20)) +
     theme(legend.title=element_text(size=15)) +
     theme(legend.text=element_text(size=15)) +
-    geom_point(colour="grey30", size=input$spotsize2-2, alpha=0.01)
+    geom_point(aes(x=W, y=Z), colour="grey30", size=input$spotsize2-2, alpha=0.01)
     
     
     

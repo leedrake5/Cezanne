@@ -18,7 +18,7 @@ fileInput('file1', 'Choose file to upload',
 accept = c('.csv', '.xls', '.xlsx', '.dat'), multiple=TRUE
 ),
 
-selectInput('filetype', "File Type", choices=c("Excel", ".dat", "Combined", "Net"), selected="Excel"),
+selectInput('filetype', "File Type", choices=c("Artax Excel", "Spreadsheet", ".dat", "XG Labs", "Combined", "Net"), selected="Excel"),
 numericInput('adjust', "Adjust",  value=0),
 
 tags$hr(),
@@ -59,7 +59,7 @@ uiOutput('inresolution1'),
 downloadButton(outputId="downloadnorm", label="normTable"),
 checkboxInput('rotate', label="Rotate", value=FALSE),
 checkboxInput('flip', label="Flip", value=FALSE),
-
+checkboxInput('multiple', label="Multiiple", value=FALSE),
 
 
 
@@ -368,7 +368,6 @@ uiOutput("hover_inforatio")
 )
 
 )
-
 ))
 
 ))
