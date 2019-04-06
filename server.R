@@ -1066,7 +1066,7 @@ output$covarianceplotvalues <- renderPlot({
     
     data.table <-  myData()
     correlations <- cor(data.table[,2:length(data.table)], use="pairwise.complete.obs")
-    corrplot(correlations, method="circle")
+    corrplot::corrplot(correlations, method="circle")
     
 })
 
