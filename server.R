@@ -25,8 +25,8 @@ library(stringi)
 
 options(shiny.maxRequestSize=9000000*1024^40)
 
-options(warn=-1)
-assign("last.warning", NULL, envir = baseenv())
+#options(warn=-1)
+#assign("last.warning", NULL, envir = baseenv())
 
 
 # Define server logic required to draw a histogram
